@@ -12,7 +12,8 @@ const user = {
     realName: '',
     roleList: [],
     resourceList:[],
-    deviceNoList:[]
+    deviceNoList:[],
+    deviceRunInfoNo:''
   },
 
   mutations: {
@@ -40,6 +41,9 @@ const user = {
     DEVICENOLIST: (state, deviceNoList) => {
       state.deviceNoList = deviceNoList
     },
+    DEVICERUNINFONO: (state, deviceRunInfoNo) => {
+      state.deviceRunInfoNo = deviceRunInfoNo
+    },
     RESOURCELIST: (state, resourceList) => {
       state.resourceList = resourceList
     }
@@ -66,24 +70,37 @@ const user = {
     //获取登陆用户的信息
     GetEmployeeInfo({ commit, state }) {
       return new Promise((resolve, reject) => {
-        getEmployeeInfo(state.token).then(response => {
-          if(response.data&&response.data.data&&response.data.data.roleList&&response.data.data.roleList.length>0&&response.data.data.resourceList&&response.data.data.resourceList.length>0){
-            const data = response.data.data
-            commit('PASSWORD', data.password)
-            commit('ORG_TYPE', data.orgType)
-            commit('ORG_ID', data.orgId)
-            commit('ORGANIZATION_NAME', data.organizationName)
-            commit('REAL_NAME', data.realName)
-            commit('ROLE_LIST', data.roleList)
-            commit('RESOURCELIST', data.resourceList)
-            commit('DEVICENOLIST', data.deviceNoList)
-            resolve(data.resourceList)
-          }else{
-            reject("您没有权限进行登陆，请联系负责人")
-          }
-        }).catch(error => {
-          reject(error)
-        })
+            commit('PASSWORD', null)
+            commit('ORG_TYPE', null)
+            commit('ORG_ID', null)
+            commit('ORGANIZATION_NAME', null)
+            commit('REAL_NAME',null)
+            commit('ROLE_LIST', null)
+            commit('RESOURCELIST', [{"id": 1, "parentId": 1, "hidden": 0, "sort": 10, "name": "用户管理", "routeUrl": "employee", "bindPageUrl": "/employee/index"}])
+            commit('DEVICENOLIST', null)
+            commit('DEVICERUNINFONO',null)
+            resolve([
+              {
+                "id": 2,
+                "parentId": 1,
+                "hidden": 0,
+                "sort": 10,
+                "name": "用户管理",
+                "routeUrl": "employee",
+                "bindPageUrl": "/employee/index",
+                "createTime": "2018-10-18 16:56:42"
+              },
+              {
+                "id": 1,
+                "parentId": 0,
+                "hidden": 0,
+                "sort": 10,
+                "name": "系统管理",
+                "routeUrl": null,
+                "bindPageUrl": null,
+                "createTime": "2018-10-18 16:55:15"
+              }
+            ])
       })
     },
     // 登出

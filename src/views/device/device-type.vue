@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
     <el-row class="app-query">
-      <el-input v-model="listQuery.deviceType" placeholder="名称"  style="width: 150px;"></el-input>
-      <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>
+      <!--<el-input v-model="listQuery.deviceType" placeholder="名称"  style="width: 150px;"></el-input>-->
+      <!--<el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>-->
       <el-button style="margin-left: 10px;" @click="handleCreate" type="primary" icon="el-icon-edit">新增</el-button>
     </el-row>
 
@@ -15,7 +15,7 @@
     </el-table>
     <menu-context ref="menuContext">
       <menu-context-item @click="handleUpdate">编辑</menu-context-item>
-      <menu-context-item @click="handleDelete">删除</menu-context-item>
+      <!--<menu-context-item @click="handleDelete">删除</menu-context-item>-->
     </menu-context>
     <div class="pagination-container">
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
@@ -85,11 +85,10 @@
             getList() {
                 this.listLoading = true
               getDeviceTypeListByConditionAndPage(this.listQuery).then(response => {
-                    const data=response.data.data
-                    this.list=data.list
-                    this.listQuery.total=data.total
-                    this.listQuery.pageNum=data.pageNum
-                    this.listQuery.pageSize=data.pageSize
+                const data=response.data.data
+
+                this.list=data
+
                     this.listLoading = false
                 })
             },

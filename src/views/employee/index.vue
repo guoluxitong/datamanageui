@@ -1,11 +1,11 @@
 <template>
   <div class="app-container employee-container">
-    <el-row class="app-query">
-      <el-input v-model="listQuery.realName" placeholder="姓名"  style="width: 150px;"></el-input>
-      <el-input v-model="listQuery.mobile" placeholder="电话"  style="width: 150px;"></el-input>
-      <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>
+    <!--<el-row class="app-query">-->
+      <!--<el-input v-model="listQuery.realName" placeholder="姓名"  style="width: 150px;"></el-input>-->
+      <!--<el-input v-model="listQuery.mobile" placeholder="电话"  style="width: 150px;"></el-input>-->
+      <!--<el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>-->
       <el-button style="margin-left: 10px;" @click="handleCreate" type="primary" icon="el-icon-edit">新增</el-button>
-    </el-row>
+    <!--</el-row>-->
 
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
       <el-table-column align="left" :show-overflow-tooltip="true" label="真实姓名">
@@ -41,8 +41,7 @@
     </el-table>
     <menu-context ref="menuContext">
       <menu-context-item @click="handleUpdate">编辑</menu-context-item>
-      <menu-context-item @click="handleEditRole">角色管理</menu-context-item>
-      <menu-context-item @click="handleDelete">删除</menu-context-item>
+      <!--<menu-context-item @click="handleEditRole">角色管理</menu-context-item>-->
     </menu-context>
     <div class="pagination-container">
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
@@ -180,8 +179,6 @@
             callback(new Error('手机号码不能为空'))
           }else if (!validatePhone(value)) {
             callback(new Error('手机号码格式有误'))
-          }else if (exist==1) {
-            callback(new Error('该用户已存在'))
           } else {
             callback()
           }
@@ -246,7 +243,8 @@
           realName:'',
           password:'',
           status:1,
-          mark:''
+          mark:'',
+          lastLoginDatetime:null
         },
         rules: {
           orgId: [{required: true, validator: validateCustomerFun }],
@@ -372,6 +370,9 @@
       editData(){
         this.$refs.employeeFormData.validate(valid => {
           if (valid) {
+
+            var d = new Date(this.employeeFormData.lastLoginDatetime);
+            this.employeeFormData.lastLoginDatetime=d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
             editEmployee(this.employeeFormData).then(data=>{
               this.dialogFormVisible = false
               console.log(data)
@@ -386,26 +387,7 @@
           }
         })
       },
-      handleDelete(row) {
-        this.$confirm('确认删除?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          deleteEmployeeById(row.id).then(data=>{
-            this.$message({
-              message: '删除成功',
-              type: 'success'
-            });
-            this.list.splice(this.list.indexOf(row), 1)
-          })
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除'
-          });
-        });
-      },
+
       handleEditRole(row){
         this.roleFormData.employeeId=row.id
         getRoleListByCondition().then(response => {

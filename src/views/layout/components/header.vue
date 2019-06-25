@@ -47,11 +47,6 @@
       let validateOldPassWord = (rule, value, callback) => {
         if (value === '') {
           callback(new Error('请输入原始密码'));
-        } else {
-          if (value!=this.$store.state.user.passWord) {
-            callback(new Error('原始密码输入不正确'));
-          }
-          callback();
         }
       }
       let validateNewPassWord = (rule, value, callback) => {
