@@ -83,6 +83,18 @@ export const constantRouterMap = [
     ]
   },
   {
+    path:'/org',
+    component: Layout,
+    children: [
+      {
+        path: 'org',
+        component: () => import('../views/org/index'),
+        name: '组织类型管理',
+        meta: { title: '组织类型管理', noCache: true}
+      }
+    ]
+  },
+  {
     path:'/home',
     component: Layout,
     children: [

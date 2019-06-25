@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <!--<el-row class="app-query">-->
-      <!--<el-input v-model="listQuery.customerName" placeholder="名称"  style="width: 150px;"></el-input>-->
+      <!--<el-input v-model="listQuery.endUserName" placeholder="名称"  style="width: 150px;"></el-input>-->
       <!--<el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>-->
       <el-button style="margin-left: 10px;" @click="handleCreate" type="primary" icon="el-icon-edit">新增</el-button>
     <!--</el-row>-->
@@ -10,7 +10,7 @@
 
       <el-table-column :show-overflow-tooltip="true" align="left" label="名称">
         <template slot-scope="scope">
-          <span>{{scope.row.customerName}}</span>
+          <span>{{scope.row.endUserName}}</span>
         </template>
       </el-table-column>
       <el-table-column :show-overflow-tooltip="true" align="left" label="是否可用">
@@ -32,8 +32,8 @@
       <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="30%">
         <el-form :rules="rules" ref="customerForm" :model="customerFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
 
-          <el-form-item label="名称" prop="customerName">
-            <el-input v-model="customerFormData.customerName"></el-input>
+          <el-form-item label="名称" prop="endUserName">
+            <el-input v-model="customerFormData.endUserName"></el-input>
           </el-form-item>
           <el-form-item label="是否可用">
             <el-select clearable class="filter-item" v-model="customerFormData.status"  style="width: 100%">
@@ -52,8 +52,7 @@
 </template>
 
 <script>
-    import {getCustomerListByConditionAndPage,editCustomer,deleteCustomerById} from '@/api/customer'
-    import {getEnterpriseListByCondition} from '@/api/enterprise'
+    import {enduserlist,editenduser} from '@/api/enduser'
     export default {
         data() {
             const validateEnterpriseFun = (rule, value, callback) => {
@@ -69,7 +68,7 @@
                 total:50,
                 pageNum:1,
                 pageSize:5,
-                customerName:""
+                endUserName:""
               },
                 statusArray:[
                     {value:0,label:'否'},
@@ -84,14 +83,14 @@
                 dialogFormVisible: false,
                 customerFormData: {
                     id:'',
-                    customerName:'',
+                    endUserName:'',
                     status:1,
                 },
                 rules: {
                     enterpriseId: [
                         { required: true, trigger: 'blur', validator: validateEnterpriseFun}
                     ],
-                    customerName: [
+                    endUserName: [
                         { required: true, message: '名称不能为空', trigger: 'blur' }
                     ],
                 },
@@ -114,7 +113,7 @@
             },
             getList() {
                 this.listLoading = true
-                getCustomerListByConditionAndPage(this.listQuery).then(response => {
+                enduserlist(this.listQuery).then(response => {
 
                     const data=response.data.data
 
@@ -127,7 +126,7 @@
                 this.customerFormData = {
                     id:'',
                     enterpriseId:'',
-                    customerName:'',
+                    endUserName:'',
                     status:1,
                     customerNo:''
                 }
@@ -151,7 +150,7 @@
             editData(){
                 this.$refs.customerForm.validate(valid => {
                     if (valid) {
-                        editCustomer(this.customerFormData).then(data=>{
+                        editenduser(this.customerFormData).then(data=>{
                             this.dialogFormVisible = false
                             this.$message({
                                 message: '成功',
