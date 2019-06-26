@@ -1,17 +1,15 @@
 <template>
   <div class="app-container">
     <el-row class="app-query">
+      <el-select clearable class="filter-item" v-model="listQuery.customerNo"  style="width: 150px;" placeholder="所属企业">
+        <el-option v-for="item in enterpriseOption" :key="item.value" :label="item.label" :value="item.value"></el-option>
+      </el-select>
+      <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>
       <el-select clearable class="filter-item" v-model="listQuery.customerNo"  style="width: 150px;" placeholder="所属客户">
         <el-option v-for="item in customerOption" :key="item.value" :label="item.label" :value="item.value"></el-option>
       </el-select>
-      <el-select clearable class="filter-item" v-model="listQuery.status"  style="width: 150px;" placeholder="是否销售">
-        <el-option v-for="item in isOrNotArray" :key="item.value" :label="item.label" :value="item.value"></el-option>
-      </el-select>
-      <el-select clearable class="filter-item" v-model="listQuery.runStatus"  style="width: 150px;" placeholder="是否运行">
-        <el-option v-for="item in isOrNotArray" :key="item.value" :label="item.label" :value="item.value"></el-option>
-      </el-select>
+      <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>
       <el-input clearable v-model="listQuery.deviceSuffix" placeholder="设备编号"  style="width: 150px;"></el-input>
-      <el-date-picker v-model="listQuery.saleDatetime" type="date" value-format="yyyy-MM-dd hh:mm:ss" placeholder="销售时间" style="width: 150px;"></el-date-picker>
       <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>
       <!--<el-button  type="primary" icon="el-icon-circle-plus-outline" @click="handleGenerateQRCode">生成二维码</el-button>-->
     </el-row>
@@ -171,12 +169,14 @@
   import {fuelArray,mediumArray} from '@/utils/common'
   import {formatDateTime} from '@/utils/date'
   import {getDeviceListByEnterpriseIdAndPage,editDevice,deleteDeviceById} from '@/api/device'
-  import {getCustomerListByEnterpriseId} from '@/api/token-dict'
-  import {getDeviceTypeList} from '@/api/device-type'
+  import {getEnterpriseListByConditionAndPage} from '@/api/enterprise'
+  import {getCustomerListByConditionAndPage} from '@/api/customer'
   export default {
     data() {
       return {
         list: null,
+        enterpriseOption:[],
+        customerOption:[],
         listQuery: {
           total:50,
           pageNum:1,
@@ -189,7 +189,6 @@
     /*      onlineStates:null,*/
           saleDatetime:null
         },
-        customerOption:[],
         isOrNotArray:[
           {value:1,label:'是'},
           {value:0,label:'否'}
@@ -242,27 +241,32 @@
       }
     },
     created() {
-      this.getList()
+      // this.getList()
       this.initCustomerList()
-      this.initDeviceTypeList()
+      this.initEnterpriseList()
     },
     methods: {
+      initEnterpriseList(){
+        let enterpriseOption=[]
+        getEnterpriseListByConditionAndPage().then(data=>{
+
+          data.data.data.forEach(item=>{
+            enterpriseOption.push({value:item.id,label:item.enterpriseName})
+          })
+
+          this.enterpriseOption=enterpriseOption
+        })
+
+      },
       initCustomerList(){
         let customerOption=[]
-        getCustomerListByEnterpriseId(this.listQuery.enterpriseId).then(data=>{
+        getCustomerListByConditionAndPage().then(data=>{
+
           data.data.data.forEach(item=>{
-            customerOption.push({value:item.code+"",label:item.name})
+            customerOption.push({value:item.id+"",label:item.customerName})
           })
           this.customerOption=customerOption
-        })
-      },
-      initDeviceTypeList(){
-        let deviceTypeOption=[]
-        getDeviceTypeList().then(data=>{
-          data.data.data.forEach(item=>{
-            deviceTypeOption.push({value:item.deviceType,label:item.deviceType})
-          })
-          this.deviceTypeOption=deviceTypeOption
+
         })
       },
       openTableMenu(row, event) {

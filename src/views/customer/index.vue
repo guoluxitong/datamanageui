@@ -53,7 +53,6 @@
 
 <script>
     import {getCustomerListByConditionAndPage,editCustomer,deleteCustomerById} from '@/api/customer'
-    import {getEnterpriseListByCondition} from '@/api/enterprise'
     export default {
         data() {
             const validateEnterpriseFun = (rule, value, callback) => {
@@ -106,13 +105,7 @@
                 this.$refs.menuContext.openTableMenu(row,event);
             },
             initEnterpriseList(){
-                let enterpriseOption=[]
-                getEnterpriseListByCondition().then(data=>{
-                    data.data.data.forEach(item=>{
-                        enterpriseOption.push({value:item.id,label:item.enterpriseName})
-                    })
-                    this.enterpriseOption=enterpriseOption
-                })
+
             },
             handleFilter() {
                 this.listQuery.pageNum = 1

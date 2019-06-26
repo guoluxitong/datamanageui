@@ -113,7 +113,7 @@ export const constantRouterMap = [
     children: [
       {
         path: 'device',
-        component: () => import('../views/device/admin-device'),
+        component: () => import('../views/device/index'),
         name: '设备管理',
         meta: { title: '设备管理', noCache: true}
       }

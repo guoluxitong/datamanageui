@@ -227,8 +227,8 @@
   import {formatDateTime} from '@/utils/date'
   import {pad} from '@/utils/common'
   import {getDeviceListByConditionAndPage,insertManyDevice,updateManyDeviceNo,editDevice,deleteDeviceById} from '@/api/device'
-  import {getEnterpriseListByCondition} from '@/api/enterprise'
-  import {getCustomerListByEnterpriseId} from '@/api/token-dict'
+  import {getEnterpriseListByConditionAndPage} from '@/api/enterprise'
+  import {getCustomerListByConditionAndPage} from '@/api/customer'
   import {getDeviceTypeList} from '@/api/device-type'
   /* 正数、负数、和小数*/
   function validateDeviceNo(textval) {
@@ -355,15 +355,16 @@
       }
     },
     created() {
-      this.getList()
+      //this.getList()
       this.initEnterpriseList()
-     /* this.initCustomerList()*/
-      this.initDeviceTypeList()
+      this.initCustomerList()
+      // this.initDeviceTypeList()
     },
     methods: {
       initEnterpriseList(){
         let enterpriseOption=[]
-        getEnterpriseListByCondition().then(data=>{
+        getEnterpriseListByConditionAndPage().then(response=>{
+          console.log(response)
           data.data.data.forEach(item=>{
             enterpriseOption.push({value:item.id,label:item.enterpriseName})
           })
@@ -373,7 +374,8 @@
       },
       initCustomerList(val){
         let customerOption=[]
-        getCustomerListByEnterpriseId(val).then(data=>{
+        getCustomerListByConditionAndPage(val).then(data=>{
+          console.log(data)
           data.data.data.forEach(item=>{
             customerOption.push({value:item.code+"",label:item.name})
           })
