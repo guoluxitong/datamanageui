@@ -1,16 +1,20 @@
 <template>
   <div class="app-container">
     <!--<el-row class="app-query">-->
-      <!--<el-input v-model="listQuery.customerName" placeholder="客户名称"  style="width: 150px;"></el-input>-->
+      <!--<el-input v-model="listQuery.agentName" placeholder="代理商名称"  style="width: 150px;"></el-input>-->
       <!--<el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>-->
       <el-button style="margin-left: 10px;" @click="handleCreate" type="primary" icon="el-icon-edit">新增</el-button>
     <!--</el-row>-->
 
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
-
-      <el-table-column :show-overflow-tooltip="true" align="left" label="客户名称">
+      <el-table-column :show-overflow-tooltip="true" align="left" label="企业id">
         <template slot-scope="scope">
-          <span>{{scope.row.customerName}}</span>
+          <span>{{scope.row.enterpriseId}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :show-overflow-tooltip="true" align="left" label="编号">
+        <template slot-scope="scope">
+          <span>{{scope.row.codePrefix}}</span>
         </template>
       </el-table-column>
       <el-table-column :show-overflow-tooltip="true" align="left" label="是否可用">
@@ -24,16 +28,18 @@
       <menu-context-item @click="handleUpdate">编辑</menu-context-item>
       <!--<menu-context-item @click="handleDelete">删除</menu-context-item>-->
     </menu-context>
-   <!-- <div class="pagination-container">
+    <!--<div class="pagination-container">
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
       </el-pagination>
     </div>-->
     <div class="el-dialog-customer">
       <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="30%">
         <el-form :rules="rules" ref="customerForm" :model="customerFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
-
-          <el-form-item label="客户名称" prop="customerName">
-            <el-input v-model="customerFormData.customerName"></el-input>
+          <el-form-item label="企业id" prop="enterpriseId">
+            <el-input v-model="customerFormData.enterpriseId"></el-input>
+          </el-form-item>
+          <el-form-item label="编号" prop="codePrefix">
+            <el-input v-model="customerFormData.codePrefix"></el-input>
           </el-form-item>
           <el-form-item label="是否可用">
             <el-select clearable class="filter-item" v-model="customerFormData.status"  style="width: 100%">
@@ -52,7 +58,7 @@
 </template>
 
 <script>
-    import {getCustomerListByConditionAndPage,editCustomer,deleteCustomerById} from '@/api/customer'
+    import {enterprisecodelist,editenterprisecode} from '@/api/enterpriseCode'
     export default {
         data() {
             const validateEnterpriseFun = (rule, value, callback) => {
@@ -61,14 +67,15 @@
                 } else {
                     callback()
                 }
-            }
+            };
             return {
                 list: null,
               listQuery: {
                 total:50,
                 pageNum:1,
                 pageSize:5,
-                customerName:""
+                enterpriseId: '',
+                codePrefix: ''
               },
                 statusArray:[
                     {value:0,label:'否'},
@@ -83,15 +90,16 @@
                 dialogFormVisible: false,
                 customerFormData: {
                     id:'',
-                    customerName:'',
+                  enterpriseId: '',
+                  codePrefix: '',
                     status:1,
                 },
                 rules: {
                     enterpriseId: [
                         { required: true, trigger: 'blur', validator: validateEnterpriseFun}
                     ],
-                    customerName: [
-                        { required: true, message: '客户名称不能为空', trigger: 'blur' }
+                  enterpriseName: [
+                        { required: true, message: '企业名称不能为空', trigger: 'blur' }
                     ],
                 },
                 listLoading: true,
@@ -105,20 +113,17 @@
                 this.$refs.menuContext.openTableMenu(row,event);
             },
             initEnterpriseList(){
-
             },
             handleFilter() {
-                this.listQuery.pageNum = 1
+                this.listQuery.pageNum = 1;
                 this.getList()
             },
             getList() {
-                this.listLoading = true
-                getCustomerListByConditionAndPage(this.listQuery).then(response => {
-
-                    const data=response.data.data
-
-                    this.list=data
-
+                this.listLoading = true;
+                enterprisecodelist(this.listQuery).then(response => {
+                  console.log(response);
+                    const data=response.data.data;
+                    this.list=data;
                     this.listLoading = false
                 })
             },
@@ -126,23 +131,23 @@
                 this.customerFormData = {
                     id:'',
                     enterpriseId:'',
-                    customerName:'',
+                  codePrefix: '',
                     status:1,
-                    customerNo:''
+
                 }
             },
             handleCreate() {
-                this.resetTemp()
-                this.dialogStatus = 'create'
-                this.dialogFormVisible = true
+                this.resetTemp();
+                this.dialogStatus = 'create';
+                this.dialogFormVisible = true;
                 this.$nextTick(() => {
                     this.$refs['customerForm'].clearValidate()
                 })
             },
             handleUpdate(row) {
-                this.customerFormData = Object.assign({}, row) // copy obj
-                this.dialogStatus = 'update'
-                this.dialogFormVisible = true
+                this.customerFormData = Object.assign({}, row) ;// copy obj
+                this.dialogStatus = 'update';
+                this.dialogFormVisible = true;
                 this.$nextTick(() => {
                     this.$refs['customerForm'].clearValidate()
                 })
@@ -150,8 +155,8 @@
             editData(){
                 this.$refs.customerForm.validate(valid => {
                     if (valid) {
-                        editCustomer(this.customerFormData).then(data=>{
-                            this.dialogFormVisible = false
+                        editenterprisecode(this.customerFormData).then(data=>{
+                            this.dialogFormVisible = false;
                             this.$message({
                                 message: '成功',
                                 type: 'success'
@@ -184,11 +189,11 @@
                 });
             },
             handleSizeChange(val) {
-                this.listQuery.pageSize = val
+                this.listQuery.pageSize = val;
                 this.getList()
             },
             handleCurrentChange(val) {
-                this.listQuery.pageNum = val
+                this.listQuery.pageNum = val;
                 this.getList()
             }
         }

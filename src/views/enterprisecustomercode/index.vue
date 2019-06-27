@@ -1,30 +1,35 @@
 <template>
   <div class="app-container">
     <!--<el-row class="app-query">-->
-      <!--<el-input v-model="listQuery.customerName" placeholder="客户名称"  style="width: 150px;"></el-input>-->
+      <!--<el-input v-model="listQuery.agentName" placeholder="代理商名称"  style="width: 150px;"></el-input>-->
       <!--<el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>-->
       <el-button style="margin-left: 10px;" @click="handleCreate" type="primary" icon="el-icon-edit">新增</el-button>
     <!--</el-row>-->
 
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
 
-      <el-table-column :show-overflow-tooltip="true" align="left" label="客户名称">
+      <el-table-column :show-overflow-tooltip="true" align="left" label="企业客户id">
         <template slot-scope="scope">
-          <span>{{scope.row.customerName}}</span>
+          <span>{{scope.row.enterpriseCustomerId}}</span>
         </template>
       </el-table-column>
-      <el-table-column :show-overflow-tooltip="true" align="left" label="是否可用">
+      <el-table-column :show-overflow-tooltip="true" align="left" label="编号后缀">
         <template slot-scope="scope">
-          <span v-for="item in statusArray" v-if="item.value==scope.row.status">{{item.label}}</span>
+          <span>{{scope.row.codePrefix}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :show-overflow-tooltip="true" align="left" label="编号">
+        <template slot-scope="scope">
+          <span>{{scope.row.code}}</span>
         </template>
       </el-table-column>
 
     </el-table>
     <menu-context ref="menuContext">
-      <menu-context-item @click="handleUpdate">编辑</menu-context-item>
+    <!--  <menu-context-item @click="handleUpdate">编辑</menu-context-item>-->
       <!--<menu-context-item @click="handleDelete">删除</menu-context-item>-->
     </menu-context>
-   <!-- <div class="pagination-container">
+    <!--<div class="pagination-container">
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
       </el-pagination>
     </div>-->
@@ -32,13 +37,11 @@
       <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="30%">
         <el-form :rules="rules" ref="customerForm" :model="customerFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
 
-          <el-form-item label="客户名称" prop="customerName">
-            <el-input v-model="customerFormData.customerName"></el-input>
+          <el-form-item label="企业客户id" prop="enterpriseCustomerId">
+            <el-input v-model="customerFormData.enterpriseCustomerId"></el-input>
           </el-form-item>
-          <el-form-item label="是否可用">
-            <el-select clearable class="filter-item" v-model="customerFormData.status"  style="width: 100%">
-              <el-option v-for="item in statusArray" :key="item.value" :label="item.label" :value="item.value"></el-option>
-            </el-select>
+          <el-form-item label="编号" prop="code">
+            <el-input v-model="customerFormData.code"></el-input>
           </el-form-item>
 
         </el-form>
@@ -52,7 +55,7 @@
 </template>
 
 <script>
-    import {getCustomerListByConditionAndPage,editCustomer,deleteCustomerById} from '@/api/customer'
+    import {enterprisecustomercodelist,editenterprisecustomercode} from '@/api/enterpriseCustomerCode'
     export default {
         data() {
             const validateEnterpriseFun = (rule, value, callback) => {
@@ -68,7 +71,9 @@
                 total:50,
                 pageNum:1,
                 pageSize:5,
-                customerName:""
+                enterpriseCustomerId:"",
+                codePrefix: '',
+                code: '',
               },
                 statusArray:[
                     {value:0,label:'否'},
@@ -83,15 +88,15 @@
                 dialogFormVisible: false,
                 customerFormData: {
                     id:'',
-                    customerName:'',
-                    status:1,
+                  enterpriseCustomerId:"",
+                  code: '',
                 },
                 rules: {
                     enterpriseId: [
                         { required: true, trigger: 'blur', validator: validateEnterpriseFun}
                     ],
-                    customerName: [
-                        { required: true, message: '客户名称不能为空', trigger: 'blur' }
+                  enterpriseCustomerId: [
+                        { required: true, message: '企业客户Id不能为空', trigger: 'blur' }
                     ],
                 },
                 listLoading: true,
@@ -113,7 +118,7 @@
             },
             getList() {
                 this.listLoading = true
-                getCustomerListByConditionAndPage(this.listQuery).then(response => {
+                enterprisecustomercodelist(this.listQuery).then(response => {
 
                     const data=response.data.data
 
@@ -125,10 +130,8 @@
             resetTemp() {
                 this.customerFormData = {
                     id:'',
-                    enterpriseId:'',
-                    customerName:'',
-                    status:1,
-                    customerNo:''
+                  enterpriseCustomerId:"",
+                  code: '',
                 }
             },
             handleCreate() {
@@ -150,7 +153,7 @@
             editData(){
                 this.$refs.customerForm.validate(valid => {
                     if (valid) {
-                        editCustomer(this.customerFormData).then(data=>{
+                        editenterprisecustomercode(this.customerFormData).then(data=>{
                             this.dialogFormVisible = false
                             this.$message({
                                 message: '成功',
