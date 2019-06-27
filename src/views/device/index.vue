@@ -242,7 +242,7 @@
       }
     },
     created() {
-      this.getList()
+    /*  this.getList()*/
       this.initCustomerList()
       this.initDeviceTypeList()
     },

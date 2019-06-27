@@ -43,10 +43,10 @@
       <menu-context-item @click="handleUpdate">编辑</menu-context-item>
       <!--<menu-context-item @click="handleEditRole">角色管理</menu-context-item>-->
     </menu-context>
-    <div class="pagination-container">
+   <!-- <div class="pagination-container">
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
       </el-pagination>
-    </div>
+    </div>-->
     <div class="el-dialog-employee">
       <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="40%">
         <el-form :rules="rules" ref="employeeFormData" :model="employeeFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>

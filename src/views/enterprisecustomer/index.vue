@@ -1,44 +1,49 @@
 <template>
   <div class="app-container">
     <!--<el-row class="app-query">-->
-      <!--<el-input v-model="listQuery.orgTypeName" placeholder="组织名称"  style="width: 150px;"></el-input>-->
-      <!--<el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>-->
+    <el-autocomplete
+      v-model="enterpriseName"
+      :fetch-suggestions="querySearchAsyncuser"
+      placeholder="请输入企业名称"
+      @select="((item)=>{handleSelectuser(item)})"
+    ></el-autocomplete>
+      <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>
       <el-button style="margin-left: 10px;" @click="handleCreate" type="primary" icon="el-icon-edit">新增</el-button>
     <!--</el-row>-->
 
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
 
-      <el-table-column :show-overflow-tooltip="true" align="left" label="组织名称">
+      <el-table-column :show-overflow-tooltip="true" align="left" label="企业id">
         <template slot-scope="scope">
-          <span>{{scope.row.orgTypeName}}</span>
+          <span>{{scope.row.enterpriseId}}</span>
         </template>
       </el-table-column>
-      <el-table-column :show-overflow-tooltip="true" align="left" label="组织编号">
+      <el-table-column :show-overflow-tooltip="true" align="left" label="客户名称">
         <template slot-scope="scope">
-          <span>{{scope.row.orgType}}</span>
+          <span>{{scope.row.customerName}}</span>
         </template>
       </el-table-column>
-
 
     </el-table>
     <menu-context ref="menuContext">
       <menu-context-item @click="handleUpdate">编辑</menu-context-item>
       <!--<menu-context-item @click="handleDelete">删除</menu-context-item>-->
     </menu-context>
-   <!-- <div class="pagination-container">
+    <!--<div class="pagination-container">
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
       </el-pagination>
     </div>-->
     <div class="el-dialog-customer">
-      <el-dialog :title="textMap[dialogorgType]" :visible.sync="dialogFormVisible" width="30%">
+      <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="30%">
         <el-form :rules="rules" ref="customerForm" :model="customerFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
 
-          <el-form-item label="组织名称" prop="orgTypeName">
-            <el-input v-model="customerFormData.orgTypeName"></el-input>
+          <el-form-item label="企业id" prop="enterpriseId">
+            <el-input v-model="customerFormData.enterpriseId"></el-input>
           </el-form-item>
-          <el-form-item label="组织编号" prop="orgTypeName">
-            <el-input v-model="customerFormData.orgType"></el-input>
+          <el-form-item label="客户名称" prop="customerName">
+            <el-input v-model="customerFormData.customerName"></el-input>
           </el-form-item>
+
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogFormVisible = false">取消</el-button>
@@ -50,7 +55,8 @@
 </template>
 
 <script>
-    import {orglist,editorg} from '@/api/org'
+    import {enterprisecustomerlist,editenterprisecustomer} from '@/api/enterpriseCustomer'
+    import {getEnterpriseListByConditionAndPage} from '@/api/enterprise'
     export default {
         data() {
             const validateEnterpriseFun = (rule, value, callback) => {
@@ -66,9 +72,18 @@
                 total:50,
                 pageNum:1,
                 pageSize:5,
-                orgTypeName:""
+                enterpriseId:"",
+                customerName:""
               },
-                orgTypeArray:[
+              enterpriselist: '',
+              enterpriseName: '',
+              listQuery2: {
+                total:50,
+                pageNum:1,
+                pageSize:5,
+                enterpriseName:null
+              },
+                statusArray:[
                     {value:0,label:'否'},
                     {value:1,label:'是'}
                 ],
@@ -77,26 +92,25 @@
                     update: '编辑',
                     create: '新增'
                 },
-                dialogorgType: '',
+                dialogStatus: '',
                 dialogFormVisible: false,
                 customerFormData: {
-                    id:'',
-                    orgTypeName:'',
-                    orgType:1,
+                  enterpriseId:"",
+                  customerName:""
                 },
                 rules: {
                     enterpriseId: [
                         { required: true, trigger: 'blur', validator: validateEnterpriseFun}
                     ],
-                    orgTypeName: [
-                        { required: true, message: '组织名称不能为空', trigger: 'blur' }
+                  customerName: [
+                        { required: true, message: '客户名称不能为空', trigger: 'blur' }
                     ],
                 },
-                listLoading: true,
+                listLoading: false,
             }
         },
         created() {
-            Promise.all([this.initEnterpriseList()]).then(()=>{this.getList()})
+            Promise.all([this.initEnterpriseList()]).then(()=>{})
         },
         methods: {
             openTableMenu(row, event) {
@@ -106,32 +120,26 @@
 
             },
             handleFilter() {
-                this.listQuery.pageNum = 1
+                this.listQuery.pageNum = 1;
                 this.getList()
             },
             getList() {
-                this.listLoading = true
-                orglist(this.listQuery).then(response => {
-
-                    const data=response.data.data
-
-                    this.list=data
-
+                this.listLoading = true;
+                enterprisecustomerlist(this.listQuery).then(response => {
+                    const data=response.data.data;
+                    this.list=data;
                     this.listLoading = false
                 })
             },
             resetTemp() {
                 this.customerFormData = {
-                    id:'',
-                    enterpriseId:'',
-                    orgTypeName:'',
-                    orgType:1,
-                    customerNo:''
+                  enterpriseId:"",
+                  customerName:""
                 }
             },
             handleCreate() {
                 this.resetTemp()
-                this.dialogorgType = 'create'
+                this.dialogStatus = 'create'
                 this.dialogFormVisible = true
                 this.$nextTick(() => {
                     this.$refs['customerForm'].clearValidate()
@@ -139,7 +147,7 @@
             },
             handleUpdate(row) {
                 this.customerFormData = Object.assign({}, row) // copy obj
-                this.dialogorgType = 'update'
+                this.dialogStatus = 'update'
                 this.dialogFormVisible = true
                 this.$nextTick(() => {
                     this.$refs['customerForm'].clearValidate()
@@ -148,7 +156,7 @@
             editData(){
                 this.$refs.customerForm.validate(valid => {
                     if (valid) {
-                        editorg(this.customerFormData).then(data=>{
+                        editenterprisecustomer(this.customerFormData).then(data=>{
                             this.dialogFormVisible = false
                             this.$message({
                                 message: '成功',
@@ -181,6 +189,27 @@
                     });
                 });
             },
+          querySearchAsyncuser(queryString, callback) {
+            getEnterpriseListByConditionAndPage(this.listQuery2).then(response => {
+              this.enterpriselist = [];
+              var results = [];
+              for (let i = 0, len = response.data.data.length; i < len; i++) {
+                response.data.data[i].value = response.data.data[i].enterpriseName;
+              }
+              this.enterpriselist = response.data.data;
+              results = queryString ? this.enterpriselist.filter(this.createFilteruser(queryString)) : this.enterpriselist;
+              callback(results);
+            });
+          },
+
+          createFilteruser(queryString, queryArr) {
+            return (queryArr) => {
+              return (queryArr.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+            };
+          },
+          handleSelectuser(item) {
+            this.listQuery.enterpriseId = item.id;
+          },
             handleSizeChange(val) {
                 this.listQuery.pageSize = val
                 this.getList()
