@@ -1,17 +1,18 @@
 <template>
-  <div class="app-container">
+  <div>
+  <div v-if="!deviceTypeVisible" class="app-container">
     <el-row class="app-query">
-      <el-select clearable class="filter-item" v-model="listQuery.customerNo"  style="width: 150px;" placeholder="所属企业">
-        <el-option v-for="item in enterpriseOption" :key="item.value" :label="item.label" :value="item.value"></el-option>
-      </el-select>
+      <el-autocomplete
+        v-model="enterpriseList.enterpriseName"
+        :fetch-suggestions="querySearchAsyncuser"
+        placeholder="所属企业"
+        @select="((item)=>{handleSelectuser(item)})"
+      ></el-autocomplete>
       <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>
-      <el-select clearable class="filter-item" v-model="listQuery.customerNo"  style="width: 150px;" placeholder="所属客户">
-        <el-option v-for="item in customerOption" :key="item.value" :label="item.label" :value="item.value"></el-option>
-      </el-select>
-      <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>
-      <el-input clearable v-model="listQuery.deviceSuffix" placeholder="设备编号"  style="width: 150px;"></el-input>
-      <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>
-      <!--<el-button  type="primary" icon="el-icon-circle-plus-outline" @click="handleGenerateQRCode">生成二维码</el-button>-->
+      <el-input clearable v-model="listQuery.suffix" placeholder="设备编号"  style="width: 150px;"></el-input>
+      <el-button  type="primary" icon="el-icon-search" @click="handleSuffixFilter">查询</el-button>
+      <el-button  type="primary" icon="el-icon-edit" @click="handleCreate">新增</el-button>
+      <el-button  type="primary"  @click="handleDeviceType">设备类型管理</el-button>
     </el-row>
 
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
@@ -20,55 +21,14 @@
           <span>{{scope.row.deviceSuffix}}</span>
         </template>
       </el-table-column>
-      <el-table-column align="left" :show-overflow-tooltip="true" label="加密编号">
+      <el-table-column align="left" :show-overflow-tooltip="true"  label="企业名称">
         <template slot-scope="scope">
-          <span>{{scope.row.deviceNo}}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="left" :show-overflow-tooltip="true"  label="所属客户">
-        <template slot-scope="scope">
-          <span>{{scope.row.customerName}}</span>
+          <span>{{enterpriseList.enterpriseName}}</span>
         </template>
       </el-table-column>
       <el-table-column align="left" :show-overflow-tooltip="true" label="设备类型">
         <template slot-scope="scope">
           <span>{{scope.row.deviceType}}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="left" :show-overflow-tooltip="true" label="燃料">
-        <template slot-scope="scope">
-          <span v-if="scope.row.power!=null">
-            <span v-for="item in fuelArray"  v-if="scope.row.power===item.value">{{item.label}}</span>
-          </span>
-          <span v-else>无</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="left" :show-overflow-tooltip="true" label="介质">
-        <template slot-scope="scope">
-          <span v-if="scope.row.media!=null">
-            <span v-for="item in mediumArray"  v-if="scope.row.media===item.value">{{item.label}}</span>
-          </span>
-          <span v-else>无</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="left" :show-overflow-tooltip="true"  label="是否销售">
-        <template slot-scope="scope">
-          <span>{{scope.row.status | statusFilterLabel(isOrNotArray)[0].label}}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="left" :show-overflow-tooltip="true"  label="是否运行">
-        <template slot-scope="scope">
-          {{scope.row.runStatus | statusFilterLabel(isOrNotArray)[0].label}}
-        </template>
-      </el-table-column>
-     <!-- <el-table-column align="left" :show-overflow-tooltip="true"  label="是否在线">
-        <template slot-scope="scope">
-          {{scope.row.onlineStates | statusFilterLabel(isOrbool)[0].label}}
-        </template>
-      </el-table-column>-->
-      <el-table-column align="left" :show-overflow-tooltip="true"  label="销售时间">
-        <template slot-scope="scope">
-          <span>{{scope.row.saleDatetime}}</span>
         </template>
       </el-table-column>
       <el-table-column align="left" :show-overflow-tooltip="true"  label="导入时间">
@@ -79,65 +39,60 @@
     </el-table>
     <menu-context ref="menuContext">
       <menu-context-item @click="handleUpdate">编辑</menu-context-item>
-      <menu-context-item @click="handleDelete">删除</menu-context-item>
+      <!--<menu-context-item @click="handleDelete">删除</menu-context-item>-->
     </menu-context>
-    <div class="pagination-container">
+    <!--<div class="pagination-container">
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
       </el-pagination>
-    </div>
+    </div>-->
     <div class="el-dialog-device">
       <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="40%">
-        <el-form ref="deviceFormData" :model="deviceFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
-          <el-row>
+        <el-form ref="DeviceFormData" :model="deviceFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
+          <el-row >
             <el-col :span="12">
-              <el-form-item label="燃料">
-                <el-select clearable class="filter-item" v-model="deviceFormData.power"  style="width: 100%">
-                  <el-option v-for="item in fuelArray" :key="item.value" :label="item.label" :value="item.value"></el-option>
-                </el-select>
+              <el-form-item label="起始设备编号" prop="deviceSuffix">
+                <el-input v-model="deviceFormData.deviceSuffix"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="介质">
-                <el-select clearable class="filter-item" v-model="deviceFormData.media"  style="width: 100%">
-                  <el-option v-for="item in mediumArray" :key="item.value" :label="item.label" :value="item.value"></el-option>
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="设备类型">
-                <el-select class="filter-item" v-model="deviceFormData.deviceType"  style="width: 100%">
-                  <el-option v-for="item in deviceTypeOption" :key="item.value" :label="item.label" :value="item.value"></el-option>
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12" v-if="deviceFormData.id">
-              <el-form-item label="是否销售">
-                <el-select class="filter-item" v-model="deviceFormData.status"  style="width: 100%">
-                  <el-option v-for="item in isOrNotArray" :key="item.value" :label="item.label" :value="item.value"></el-option>
-                </el-select>
+              <el-form-item label="设备类型" prop="deviceType">
+                <el-autocomplete
+                  v-model="deviceFormData.deviceType"
+                  :fetch-suggestions="querySearchAsyncuser3"
+                  placeholder="设备类型"
+                  @select="((item)=>{handleSelectuser3(item)})"
+                ></el-autocomplete>
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
-          <el-col :span="12">
-            <el-form-item label="是否运行">
-              <el-select class="filter-item" v-model="deviceFormData.runStatus"  style="width: 100%">
-                <el-option v-for="item in isOrNotArray" :key="item.value" :label="item.label" :value="item.value"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12" v-if="deviceFormData.id">
-            <el-form-item label="售出时间">
-              <el-date-picker type="datetime" v-model="deviceFormData.saleDatetime" style="width: 100%;" default-time="00:00:00"></el-date-picker>
-            </el-form-item>
-          </el-col>
-        </el-row>
-          <el-row>
+          <el-row v-if="deviceFormData.devicePrefix==''">
             <el-col :span="12">
-              <el-form-item label="加密编号">
-                <el-input v-model="deviceFormData.deviceNo" ></el-input>
+              <el-form-item label="结束设备编号" prop="deviceSuffix">
+                <el-input v-model="deviceFormData.deviceSuffix"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="企业" prop="enterpriseId">
+                <el-autocomplete
+                  v-model="enterpriseList.enterpriseName"
+                  :fetch-suggestions="querySearchAsyncuser"
+                  placeholder="企业"
+                  @select="((item)=>{handleSelectuser(item)})"
+                ></el-autocomplete>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row v-if="deviceFormData.devicePrefix!=''">
+            <el-col :span="12">
+              <el-form-item label="设备编码" prop="devicePrefix">
+                <el-input v-model="deviceFormData.devicePrefix"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="是否可用" prop="status">
+                <el-select clearable class="filter-item" v-model="deviceFormData.status" >
+                  <el-option v-for="item in statusArray1" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>
@@ -163,32 +118,119 @@
       </el-dialog>-->
     </div>
   </div>
+    <div v-if="deviceTypeVisible">
+      <el-row class="app-query">
+        <!--<el-input v-model="listQuery.deviceType" placeholder="设备类型名称"  style="width: 150px;"></el-input>-->
+        <!--<el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>-->
+        <el-button style="margin-left: 10px;" @click="handleDeviceTypeCreate" type="primary" icon="el-icon-edit">新增</el-button>
+        <el-button style="margin-left: 80%;" @click="handleCenal" type="primary" >取消</el-button>
+      </el-row>
+
+      <el-table :data="deviceTypeList" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
+        <el-table-column :show-overflow-tooltip="true" align="left" label="设备类型名称">
+          <template slot-scope="scope">
+            <span>{{scope.row.deviceType}}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+      <menu-context ref="menuContext">
+        <menu-context-item @click="handleDeviceTypeUpdate">编辑</menu-context-item>
+        <!--<menu-context-item @click="handleDelete">删除</menu-context-item>-->
+      </menu-context>
+      <!-- <div class="pagination-container">
+         <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
+         </el-pagination>
+       </div>-->
+      <div class="el-dialog-enterprise">
+        <el-dialog :title="textMap[dialogStatus]" :visible.sync="dilogdeviceTypeVisible" width="30%">
+          <el-form :rules="qRCodeRules" ref="deviceTypeForm" :model="deviceTypeFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
+            <el-form-item v-if="deviceTypeFormData.deviceType==''" label="设备类型名称" prop="deviceType">
+              <el-input v-model="deviceTypeFormData.deviceType"></el-input>
+            </el-form-item>
+            <el-form-item v-if="deviceTypeFormData.deviceType!=''" label="设备类型" prop="deviceType">
+              <el-autocomplete
+                v-model="deviceFormData.deviceType"
+                :fetch-suggestions="querySearchAsyncuser3"
+                placeholder="设备类型"
+                @select="((item)=>{handleSelectuser3(item)})"
+              ></el-autocomplete>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dilogdeviceTypeVisible = false">取消</el-button>
+            <el-button type="primary" @click="editDeviceTypeData">确认</el-button>
+          </div>
+        </el-dialog>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
   import {fuelArray,mediumArray} from '@/utils/common'
   import {formatDateTime} from '@/utils/date'
-  import {getDeviceListByEnterpriseIdAndPage,editDevice,deleteDeviceById} from '@/api/device'
+  import {getDeviceListByEnterpriseIdAndPage,getDeviceListByCustomerId,getDeviceListBySuffix,insertDevice,editDevice,deleteDeviceById} from '@/api/device'
   import {getEnterpriseListByConditionAndPage} from '@/api/enterprise'
   import {getCustomerListByConditionAndPage} from '@/api/customer'
+  import {getDeviceTypeListByConditionAndPage,editdeviceType,deletedeviceTypebyid} from '@/api/device-type'
   export default {
     data() {
       return {
-        list: null,
+        list:[],
+        deviceTypeList:[],
+       DeviceList1:
+          {
+            prefix:'',
+            deviceType:'',
+            suffix:'',
+            saleStatus:'',
+          },
+        deviceList:
+          {
+            deviceType:'',
+            enterpriseId:'',
+            deviceSuffix:'',
+            subType:'',
+            deviceNo:''
+          },
+        addDeviceTypeList:[],
+        deviceNoList:{},
         enterpriseOption:[],
         customerOption:[],
+        enterpriseList:{
+          id:'',
+          enterpriseName:''
+        },
+        customerList:{
+          id:'',
+          customerName:''
+        },
+       deviceTypeFormData: {
+        id:'',
+        deviceType:'',
+      },
+        listQuery2: {
+          total:50,
+          pageNum:1,
+          pageSize:5,
+          deviceType:null
+        },
         listQuery: {
           total:50,
           pageNum:1,
           pageSize:5,
-          deviceSuffix:null,
+         suffix:null,
           customerNo:null,
-          enterpriseId:this.$store.state.user.orgId,
+          enterpriseId:null,
           status:null,
           runStatus:null,
     /*      onlineStates:null,*/
           saleDatetime:null
         },
+        statusArray1:[
+          {value:0,label:'否'},
+          {value:1,label:'是'}
+        ],
         isOrNotArray:[
           {value:1,label:'是'},
           {value:0,label:'否'}
@@ -203,19 +245,20 @@
           update: '编辑',
           create: '新增'
         },
+        deviceTypeVisible:false,
+        dilogdeviceTypeVisible:false,
         fuelArray:fuelArray,
         mediumArray:mediumArray,
         dialogStatus: '',
         dialogFormVisible: false,
         deviceFormData: {
-          id:'',
-          media:'',
-          power:'',
+          devicePrefix: '',
+         status: '',
+          enterpriseId:'',
           deviceType:'',
-          status:1,
-          runStatus:1,
+          deviceSuffix:'',
+          subType:'',
           deviceNo:'',
-          saleDatetime:''
         },
         dialogQRCodeFormVisible:false,
         qRCodeFormData:{
@@ -228,6 +271,9 @@
           ],
           endSuffix: [
             { required: true, message: '结束编号不能为空', trigger: 'blur' }
+          ],
+          deviceType : [
+            { required: true, message: '设备类型名称不能为空', trigger: 'blur' }
           ]
         },
         listLoading:false
@@ -241,22 +287,71 @@
       }
     },
     created() {
-      // this.getList()
-      this.initCustomerList()
-      this.initEnterpriseList()
     },
     methods: {
-      initEnterpriseList(){
-        let enterpriseOption=[]
-        getEnterpriseListByConditionAndPage().then(data=>{
+      querySearchAsyncuser(queryString, callback) {
+        getEnterpriseListByConditionAndPage().then(response => {
+          this.enterpriseList = [];
+          var results = [];
+          for (let i = 0, len = response.data.data.length; i < len; i++) {
+            response.data.data[i].value = response.data.data[i].enterpriseName;
+          }
+          this.enterpriselist = response.data.data;
+          results = queryString ? this.enterpriselist.filter(this.createFilteruser(queryString)) : this.enterpriselist;
+          callback(results);
+        });
+      },
 
-          data.data.data.forEach(item=>{
-            enterpriseOption.push({value:item.id,label:item.enterpriseName})
-          })
+      createFilteruser(queryString, queryArr) {
+        return (queryArr) => {
+          return (queryArr.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+        };
+      },
+      handleSelectuser(item) {
+        this.listQuery.enterpriseId = item.id;
+        this.deviceFormData.enterpriseId=item.id
+      },
+      querySearchAsyncuser2(queryString, callback) {
+        getCustomerListByConditionAndPage().then(response => {
+          this.customerList = [];
+          var results = [];
+          for (let i = 0, len = response.data.data.length; i < len; i++) {
+            response.data.data[i].value = response.data.data[i].customerName;
+          }
+          this.customerList = response.data.data;
+          results = queryString ? this.customerList.filter(this.createFilteruser2(queryString)) : this.customerList;
+          callback(results);
+        });
+      },
 
-          this.enterpriseOption=enterpriseOption
-        })
+      createFilteruser2(queryString, queryArr) {
+        return (queryArr) => {
+          return (queryArr.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+        };
+      },
+      handleSelectuser2(item) {
+        this.listQuery.customerId = item.id;
 
+      },
+      querySearchAsyncuser3(queryString, callback) {
+        getDeviceTypeListByConditionAndPage(this.listQuery2).then(response => {
+          this.addDeviceTypeList = [];
+          var results = [];
+          for (let i = 0, len = response.data.data.length; i < len; i++) {
+            response.data.data[i].value = response.data.data[i].deviceType;
+          }
+          this.addDeviceTypeList = response.data.data;
+          results = queryString ? this.addDeviceTypeList.filter(this.createFilteruser3(queryString)) : this.addDeviceTypeList;
+          callback(results);
+        });
+      },
+
+      createFilteruser3(queryString, queryArr) {
+        return (queryArr) => {
+          return (queryArr.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+        };
+      },
+      handleSelectuser3(item) {
       },
       initCustomerList(){
         let customerOption=[]
@@ -273,41 +368,114 @@
         this.$refs.menuContext.openTableMenu(row,event);
       },
       handleFilter() {
-        this.listQuery.pageNum = 1
+        this.listQuery.pageNum = 1;
         this.getList()
       },
-      getList() {
+      getDeviceTypeList() {
         this.listLoading = true
-        getDeviceListByEnterpriseIdAndPage(this.listQuery).then(response => {
+        getDeviceTypeListByConditionAndPage(this.listQuery2).then(response => {
           const data=response.data.data
-          this.list=data.list
-          this.listQuery.total=data.total
-          this.listQuery.pageNum=data.pageNum
-          this.listQuery.pageSize=data.pageSize
+
+          this.deviceTypeList=data
+
           this.listLoading = false
         })
       },
+      getList() {
 
+        this.listLoading = true
+        getDeviceListByEnterpriseIdAndPage(this.listQuery).then(response => {
+          const data=response.data.data
+          this.list=data;
+          this.listLoading = false
+        })
+      },
+      getListBySuffix() {
+        this.listLoading = true
+        getDeviceListBySuffix(this.listQuery.suffix).then(response => {
+          const data=response.data.data
+          this.deviceNoList=data;
+          this.list.push(this.deviceNoList)
+          this.listLoading = false
+        })
+      },
+      handleCustomerFilter() {
+        this.listQuery.pageNum = 1;
+        this.getCustomerList()
+      },
+      handleSuffixFilter(){
+        this.listQuery.pageNum = 1;
+        this.getListBySuffix()
+      },
+      getCustomerList() {
+
+        this.listLoading = true
+        getDeviceListByCustomerId(this.listQuery).then(response => {
+          const data=response.data.data
+          this.list=data
+          this.listLoading = false
+        })
+      },
       resetTemp() {
-        this.deviceFormData = {
+        this.deviceFormData={
+          devicePrefix: '',
+          status: '',
+          enterpriseId:'',
+            deviceType:'',
+            deviceSuffix:'',
+            subType:'',
+            deviceNo:'',
+        };
+      },
+      handleDeviceTypeUpdate(row){
+        this.deviceTypeFormData = Object.assign({}, row) // copy obj
+        this.dialogStatus = 'update'
+        this.dilogdeviceTypeVisible = true
+        this.$nextTick(() => {
+          this.$refs['deviceTypeForm'].clearValidate()
+        })
+      },
+      handleDeviceTypeCreate() {
+        this.deviceTypeFormData={
           id:'',
-          media:'',
-          power:'',
-          deviceType:'',
-          status:1,
-          runStatus:1,
-          deviceNo:'',
-        /*  onlineStates:0,*/
-          saleDatetime:''
-        }
+            deviceType:'',
+        },
+        this.dialogStatus = 'create'
+        this.dilogdeviceTypeVisible = true
+        this.$nextTick(() => {
+          this.$refs['deviceTypeForm'].clearValidate()
+        })
+      },
+      editDeviceTypeData(){
+        this.$refs.deviceTypeForm.validate(valid => {
+          if (valid) {
+            editdeviceType(this.deviceTypeFormData).then(data=>{
+              this.dilogdeviceTypeVisible = false
+              this.$message({
+                message: '成功',
+                type: 'success'
+              });
+              this.getDeviceTypeList();
+            })
+          } else {
+            return false
+          }
+        })
       },
       handleCreate() {
         this.resetTemp()
         this.dialogStatus = 'create'
         this.dialogFormVisible = true
         this.$nextTick(() => {
-          this.$refs['deviceFormData'].clearValidate()
+          this.$refs['DeviceFormData'].clearValidate()
         })
+      },
+      handleDeviceType(){
+        this.deviceTypeVisible=true;
+        this.getDeviceTypeList();
+      },
+      handleCenal(){
+        this.deviceTypeVisible=false;
       },
       handleGenerateQRCode(){
         this.qRCodeFormData.startSuffix=''
@@ -319,15 +487,10 @@
       },
       handleUpdate(row) {
         this.deviceFormData = Object.assign({}, row) // copy obj
-        if(this.deviceFormData.saleDatetime){
-          this.deviceFormData.saleDatetime=new Date(this.deviceFormData.saleDatetime)
-        }else{
-          this.deviceFormData.saleDatetime=new Date()
-        }
         this.dialogStatus = 'update'
         this.dialogFormVisible = true
         this.$nextTick(() => {
-          this.$refs['deviceFormData'].clearValidate()
+          this.$refs['DeviceFormData'].clearValidate()
         })
       },
       generateQRCode(){
@@ -341,18 +504,35 @@
         })
       },
       editData(){
-        this.$refs.deviceFormData.validate(valid => {
+        this.$refs.DeviceFormData.validate(valid => {
           if (valid) {
-            this.deviceFormData.saleDatetime=formatDateTime(this.deviceFormData.saleDatetime,"yyyy-MM-dd hh:mm:ss")
-            editDevice(this.deviceFormData).then(data=>{
-              this.dialogFormVisible = false
-              this.$message({
-                message: "成功",
-                type: 'success'
-              });
-              this.getList()
-            })
-          } else {
+            if( this.dialogStatus == 'create'){
+              this.deviceList.deviceType=this.deviceFormData.deviceType,
+                this.deviceList.enterpriseId=this.deviceFormData.enterpriseId,
+                this.deviceList.deviceSuffix=this.deviceFormData.deviceSuffix,
+                this.deviceList.subType=this.deviceFormData.deviceType,
+                this.deviceList.deviceNo=this.deviceFormData.deviceSuffix
+              insertDevice(this.deviceList).then(data=>{
+                this.dialogFormVisible = false
+                this.$message({
+                  message: "成功",
+                  type: 'success'
+                });
+              })
+            }else{
+              this.DeviceList1.prefix=this.deviceFormData.devicePrefix,
+                this.DeviceList1.deviceType=this.deviceFormData.deviceType,
+                this.DeviceList1.suffix=this.deviceFormData.deviceSuffix,
+                this.DeviceList1.saleStatus=this.deviceFormData.status,
+              editDevice(this.DeviceList1).then(data=>{
+                this.dialogFormVisible = false
+                this.$message({
+                  message: "成功",
+                  type: 'success'
+                });
+              })
+            }
+            } else {
             return false
           }
         })

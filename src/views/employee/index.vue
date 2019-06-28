@@ -141,8 +141,8 @@
   import {validateRealName,validatePassWord,validatePhone,validateQQ,validateEmail} from '@/utils/validate'
   import {getEmployeeListByConditionAndPage,editEmployee,editEmployeeRole,deleteEmployeeById} from '@/api/employee'
   import {getRoleListByCondition,getRoleListByEmployeeId} from '@/api/role'
-  import {getEnterpriseListByCondition} from '@/api/enterprise'
-  import {getCustomerListByCondition} from '@/api/customer'
+  import {getEnterpriseListByConditionAndPage} from '@/api/enterprise'
+  import {enterprisecustomerlist} from '@/api/enterpriseCustomer'
   export default {
     data() {
       const validateCustomerFun = (rule, value, callback) => {
@@ -281,12 +281,12 @@
     created() {
       this.getList()
       this.initEnterpriseList()
-      this.initCustomerList()
+     /* this.initCustomerList()*/
     },
     methods: {
       initEnterpriseList(){
         let enterpriseOption=[]
-        getEnterpriseListByCondition().then(data=>{
+        getEnterpriseListByConditionAndPage().then(data=>{
           data.data.data.forEach(item=>{
             enterpriseOption.push({value:item.id,label:item.enterpriseName})
           })
@@ -295,7 +295,7 @@
       },
       initCustomerList(){
         let customerOption=[]
-        getCustomerListByCondition().then(data=>{
+        enterprisecustomerlist().then(data=>{
           data.data.data.forEach(item=>{
             customerOption.push({value:item.id+"",label:item.customerName})
           })

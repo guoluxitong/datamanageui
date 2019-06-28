@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getEnterpriseListByConditionAndPage(query) {
     return request({
-        url: '/enterprise/enterpriselistbyconditionandpage',
+        url: '/webapi/datacenter/enterprise/list',
         method: 'get',
         params: query
     })

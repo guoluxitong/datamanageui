@@ -7,6 +7,9 @@
     <el-form-item prop="passWord">
       <el-input type="password" v-model="loginForm.passWord" auto-complete="off" placeholder="密码"></el-input>
     </el-form-item>
+    <el-form-item v-show="false" prop="orgType">
+      <el-input type="password" v-model="loginForm.orgType" auto-complete="off" ></el-input>
+    </el-form-item>
     <!--<el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox>-->
     <el-form-item style="width:100%;">
       <el-button type="primary" style="width:100%;" @click.native.prevent="handleLogin" :loading="loading">登录</el-button>
@@ -21,7 +24,8 @@
         loading: false,
         loginForm: {
           account: '',
-          passWord: ''
+          passWord: '',
+          orgType:3
         },
         rules: {
           account: [
@@ -36,6 +40,7 @@
     },
     methods: {
       handleLogin() {
+        this.loginForm.orgType=3
         this.$refs.loginForm.validate(valid => {
           if (valid) {
             this.loading = true

@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function agentlist(query) {
   return request({
-    url: '/agent/agentlist',
+    url: 'webapi/datacenter/agent',
     method: 'get',
     params: query
   })

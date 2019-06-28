@@ -41,20 +41,8 @@ export const constantRouterMap = [
       {
         path: 'customer',
         component: () => import('../views/customer/index'),
-        name: '客户管理',
-        meta: { title: '客户管理', noCache: true}
-      }
-    ]
-  },
-  {
-    path:'/company',
-    component: Layout,
-    children: [
-      {
-        path: 'company',
-        component: () => import('../views/company/index'),
-        name: '公司管理',
-        meta: { title: '公司管理', noCache: true}
+        name: '锅炉厂管理',
+        meta: { title: '锅炉厂管理', noCache: true}
       }
     ]
   },
@@ -83,14 +71,14 @@ export const constantRouterMap = [
     ]
   },
   {
-    path:'/org',
+    path:'/admin-device',
     component: Layout,
     children: [
       {
-        path: 'org',
-        component: () => import('../views/org/index'),
-        name: '组织类型管理',
-        meta: { title: '组织类型管理', noCache: true}
+        path: 'device',
+        component: () => import('../views/device/index'),
+        name: '设备管理',
+        meta: { title: '设备管理', noCache: true}
       }
     ]
   },
@@ -106,28 +94,15 @@ export const constantRouterMap = [
       }
     ]
   },
-
   {
-    path:'/admin-device',
+    path:'/org',
     component: Layout,
     children: [
       {
-        path: 'device',
-        component: () => import('../views/device/index'),
-        name: '设备管理',
-        meta: { title: '设备管理', noCache: true}
-      }
-    ]
-  },
-  {
-    path:'/device-type',
-    component: Layout,
-    children: [
-      {
-        path: 'device-type',
-        component: () => import('../views/device/device-type'),
-        name: '设备类型管理',
-        meta: { title: '设备类型管理', noCache: true}
+        path: 'org',
+        component: () => import('../views/org/index'),
+        name: '组织类型管理',
+        meta: { title: '组织类型管理', noCache: true}
       }
     ]
   }

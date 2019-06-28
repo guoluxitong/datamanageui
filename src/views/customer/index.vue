@@ -8,7 +8,7 @@
 
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
 
-      <el-table-column :show-overflow-tooltip="true" align="left" label="客户名称">
+      <el-table-column :show-overflow-tooltip="true" align="left" label="锅炉厂名称">
         <template slot-scope="scope">
           <span>{{scope.row.customerName}}</span>
         </template>
@@ -32,7 +32,7 @@
       <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="30%">
         <el-form :rules="rules" ref="customerForm" :model="customerFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
 
-          <el-form-item label="客户名称" prop="customerName">
+          <el-form-item label="锅炉厂名称" prop="customerName">
             <el-input v-model="customerFormData.customerName"></el-input>
           </el-form-item>
           <el-form-item label="是否可用">

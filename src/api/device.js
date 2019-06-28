@@ -1,8 +1,9 @@
 import request from '@/utils/request'
 
-export function getDeviceListByConditionAndPage(query) {
+export function getDeviceListByCustomerId(query) {
+
   return request({
-    url: '/device/devicelistbyconditionandpage',
+    url: '/device/devicelistbycustomerId',
     method: 'get',
     params: query
   })
@@ -10,39 +11,40 @@ export function getDeviceListByConditionAndPage(query) {
 
 export function getDeviceListByEnterpriseIdAndPage(query) {
   return request({
-    url: '/device/getdevicelistbyenterpriseidandpage',
+    url: '/device/devicelistbyenterpriseId',
     method: 'get',
     params: query
   })
 }
-export function getDeviceListByDeviceNo(data) {
+export function getDeviceListBySuffix(query) {
   return request({
-    url: '/device/getdevicelistbyonlinedevice',
-    method: 'post',
-    data:data
+    url: '/device/get/suffix',
+    method: 'get',
+    params:{suffix:query}
   })
 }
-export function insertManyDevice(data) {
+export function insertDevice(deviceList) {
+  console.log(deviceList)
   return request({
-    url: '/device/insertmanydevice',
+    url: '/device/create',
     method: 'post',
-    data:data
+    data:[deviceList]
   })
 }
 
 export function updateManyDeviceNo(data) {
   return request({
-    url: '/device/updatemanydeviceno',
+    url: '/device/fix/modify',
     method: 'post',
     data:data
   })
 }
 
-export function editDevice(data) {
+export function editDevice({ suffix,  prefix,  deviceType,  saleStatus}) {
   return request({
-    url: '/device/editdevice',
+    url: '/device/fix/modify',
     method: 'post',
-    data:data
+    params:{suffix:suffix,  prefix:prefix,  deviceType:deviceType,  saleStatus:saleStatus}
   })
 }
 export function deleteDeviceById(id) {

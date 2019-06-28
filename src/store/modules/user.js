@@ -53,7 +53,7 @@ const user = {
     //用户登陆
     login({ commit }, employeeInfo) {
       return new Promise((resolve, reject) => {
-        login(employeeInfo.account.trim(), employeeInfo.passWord).then(response => {
+        login(employeeInfo.account.trim(), employeeInfo.passWord,employeeInfo.orgType).then(response => {
           const data = response.data
           if(data.code!=0){
             commit('SET_TOKEN', data.data)

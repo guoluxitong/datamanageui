@@ -20,8 +20,8 @@
       </el-table-column>
       <el-table-column  align='center' label="操作">
         <template slot-scope="scope">
-          <el-button size="mini" type="success" @click="customer(scope.$index, scope.row)">查看企业客户管理</el-button>
-          <el-button size="mini" type="success" @click="enterprise(scope.$index, scope.row)">查看企业编号管理</el-button>
+          <el-button size="mini" type="success" @click="customer(scope.$index, scope.row)">企业客户管理</el-button>
+          <el-button size="mini" type="success" @click="enterprise(scope.$index, scope.row)">企业编号管理</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -54,12 +54,12 @@
   </div>
     <div v-if="enterprisecodevisible===1">
       <el-button style="margin-left: 10px;" @click="handleCustomerCreate" type="primary" icon="el-icon-edit">新增</el-button>
-      <el-button style="margin-left: 10px;" @click="handleCancel" type="primary" >取消</el-button>
+      <el-button style="margin-left: 80%;" @click="handleCancel" type="primary" >取消</el-button>
       <el-table :data="customerList" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
 
-        <el-table-column :show-overflow-tooltip="true" align="left" label="企业id">
+        <el-table-column :show-overflow-tooltip="true" align="left" label="企业名称">
           <template slot-scope="scope">
-            <span>{{scope.row.enterpriseId}}</span>
+            <span>{{enterpriseName}}</span>
           </template>
         </el-table-column>
         <el-table-column :show-overflow-tooltip="true" align="left" label="客户名称">
@@ -69,7 +69,7 @@
         </el-table-column>
           <el-table-column  align='center' label="操作">
             <template slot-scope="scope">
-              <el-button size="mini" type="success" @click="customercode(scope.$index, scope.row)">查看企业客户编号管理</el-button>
+              <el-button size="mini" type="success" @click="customercode(scope.$index, scope.row)">企业客户编号管理</el-button>
             </template>
           </el-table-column>
       </el-table>
@@ -85,8 +85,13 @@
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogCustomerFormVisible" width="30%">
           <el-form :rules="rules" ref="enterprisecustomerForm" :model="enterprisecustomerFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
 
-            <el-form-item label="企业id" prop="enterpriseId">
-              <el-input v-model="enterprisecustomerFormData.enterpriseId"></el-input>
+            <el-form-item label="企业" prop="enterpriseId">
+              <el-autocomplete
+                v-model="enterpriseName"
+                :fetch-suggestions="querySearchAsyncuser"
+                placeholder="企业"
+                @select="((item)=>{handleSelectuser(item)})"
+              ></el-autocomplete>
             </el-form-item>
             <el-form-item label="客户名称" prop="customerName">
               <el-input v-model="enterprisecustomerFormData.customerName"></el-input>
@@ -102,12 +107,12 @@
     </div>
     <div v-if="enterprisecodevisible===2">
       <el-button style="margin-left: 10px;" @click="handleCodeCreate" type="primary" icon="el-icon-edit">新增</el-button>
-      <el-button style="margin-left: 10px;" @click="handleCodeCancel" type="primary" >取消</el-button>
-      <el-table :data="customerCodeList" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
+      <el-button style="margin-left: 80%;" @click="handleCodeCancel" type="primary" >取消</el-button>
+      <el-table :data="customerCodeList" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" >
 
-        <el-table-column :show-overflow-tooltip="true" align="left" label="企业客户id">
+        <el-table-column :show-overflow-tooltip="true" align="left" label="客户名称">
           <template slot-scope="scope">
-            <span>{{scope.row.enterpriseCustomerId}}</span>
+            <span>{{scope.row.customerName}}</span>
           </template>
         </el-table-column>
         <el-table-column :show-overflow-tooltip="true" align="left" label="编号后缀">
@@ -115,11 +120,7 @@
             <span>{{scope.row.codePrefix}}</span>
           </template>
         </el-table-column>
-        <el-table-column :show-overflow-tooltip="true" align="left" label="客户名称">
-          <template slot-scope="scope">
-            <span>{{scope.row.customerName}}</span>
-          </template>
-        </el-table-column>
+
         <el-table-column :show-overflow-tooltip="true" align="left" label="编号">
           <template slot-scope="scope">
             <span>{{scope.row.code}}</span>
@@ -135,8 +136,8 @@
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogCustomerCodeFormVisible" width="30%">
           <el-form :rules="rules" ref="customerForm" :model="enterprisecustomerCodeFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
 
-            <el-form-item label="企业客户id" prop="enterpriseCustomerId">
-              <el-input v-model="enterprisecustomerCodeFormData.enterpriseCustomerId"></el-input>
+            <el-form-item label="企业客户" >
+              <el-input v-model="enterpriseCustomerId"></el-input>
             </el-form-item>
             <el-form-item label="编号" prop="code">
               <el-input v-model="enterprisecustomerCodeFormData.code"></el-input>
@@ -151,13 +152,8 @@
     </div >
     <div  v-if="enterprisecodevisible===3">
       <el-button style="margin-left: 10px;" @click="handleEnterpriseCreate" type="primary" icon="el-icon-edit">新增</el-button>
-      <el-button style="margin-left: 10px;" @click="handleEnterpriseCancel" type="primary" >取消</el-button>
+      <el-button style="margin-left: 80%;" @click="handleEnterpriseCancel" type="primary" >取消</el-button>
       <el-table :data="enterpriseCodeList" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
-        <el-table-column :show-overflow-tooltip="true" align="left" label="企业id">
-          <template slot-scope="scope">
-            <span>{{scope.row.enterpriseId}}</span>
-          </template>
-        </el-table-column>
         <el-table-column :show-overflow-tooltip="true" align="left" label="企业名称">
           <template slot-scope="scope">
             <span>{{scope.row.enterpriseName}}</span>
@@ -185,8 +181,13 @@
       <div class="el-dialog-customer">
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogCodeFormVisible" width="30%">
           <el-form :rules="rules" ref="enterpriseForm" :model="enterpriseCodeFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
-            <el-form-item label="企业id" prop="enterpriseId">
-              <el-input v-model="enterpriseCodeFormData.enterpriseId"></el-input>
+            <el-form-item label="企业" prop="enterpriseId">
+              <el-autocomplete
+                v-model="enterpriseName"
+                :fetch-suggestions="querySearchAsyncuser"
+                placeholder="企业"
+                @select="((item)=>{handleSelectuser(item)})"
+              ></el-autocomplete>
             </el-form-item>
             <el-form-item label="编号" prop="codePrefix">
               <el-input v-model="enterpriseCodeFormData.codePrefix"></el-input>
@@ -226,6 +227,7 @@
                     pageSize:5,
                     enterpriseName:null
                 },
+              enterpriseName: '',
               listQuery1: {
                 total:50,
                 pageNum:1,
@@ -260,6 +262,7 @@
                     update: '编辑',
                     create: '新增'
                 },
+              enterpriseCustomerId: '',
                 dialogStatus: '',
                 dialogFormVisible: false,
               dialogCodeFormVisible: false,
@@ -284,6 +287,7 @@
                 code:"",
                 codePrefix:'',
               },
+              enterpriseList:[],
               enterprisecodevisible:0,
                 rules: {
                   enterpriseId: [
@@ -312,14 +316,38 @@
             this.getList()
         },
         methods: {
+          querySearchAsyncuser(queryString, callback) {
+            getEnterpriseListByConditionAndPage().then(response => {
+              this.enterpriseList = [];
+              var results = [];
+              for (let i = 0, len = response.data.data.length; i < len; i++) {
+                response.data.data[i].value = response.data.data[i].enterpriseName;
+              }
+              this.enterpriselist = response.data.data;
+              results = queryString ? this.enterpriselist.filter(this.createFilteruser(queryString)) : this.enterpriselist;
+              callback(results);
+            });
+          },
+
+          createFilteruser(queryString, queryArr) {
+            return (queryArr) => {
+              return (queryArr.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+            };
+          },
+          handleSelectuser(item) {
+            this.enterpriseCodeFormData.enterpriseId=item.id
+            this.enterprisecustomerFormData.enterpriseId=item.id
+          },
           customercode(index,row){
             this.enterprisecodevisible=2;
             this.listQuery2.enterpriseCustomerId=row.id;
+            this.enterpriseCustomerId=row.id;
             this.getCustomerCodeList()
           },
           customer(index,row){
             this.enterprisecodevisible=1;
             this.listQuery1.enterpriseId=row.id;
+            this.enterpriseName=row.enterpriseName;
             this.getCustomerList()
           },
           enterprise(index,row){
@@ -462,6 +490,7 @@
             })
           },
           editCodeData(){
+            this.enterprisecustomerCodeFormData.enterpriseCustomerId=this.enterpriseCustomerId;
             this.$refs.customerForm.validate(valid => {
               if (valid) {
                 editenterprisecustomercode(this.enterprisecustomerCodeFormData).then(data=>{
