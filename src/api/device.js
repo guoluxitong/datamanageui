@@ -1,9 +1,8 @@
 import request from '@/utils/request'
-
-export function getDeviceListByCustomerId(query) {
-
+import qs from 'qs'
+export function getDeviceList(query) {
   return request({
-    url: '/device/devicelistbycustomerId',
+    url: '/webapi/datacenter/device/list',
     method: 'get',
     params: query
   })
@@ -11,45 +10,44 @@ export function getDeviceListByCustomerId(query) {
 
 export function getDeviceListByEnterpriseIdAndPage(query) {
   return request({
-    url: '/device/devicelistbyenterpriseId',
+    url: '/webapi/datacenter/device/find/enterprise',
     method: 'get',
     params: query
   })
 }
 export function getDeviceListBySuffix(query) {
   return request({
-    url: '/device/get/suffix',
+    url: '/webapi/datacenter/device/get/deviceno',
     method: 'get',
-    params:{suffix:query}
+    params:{deviceNo:query}
   })
 }
-export function insertDevice(deviceList) {
-  console.log(deviceList)
+export function insertDevice(data) {
   return request({
-    url: '/device/create',
-    method: 'post',
-    data:[deviceList]
-  })
-}
-
-export function updateManyDeviceNo(data) {
-  return request({
-    url: '/device/fix/modify',
+    url: '/webapi/datacenter/device/create',
     method: 'post',
     data:data
   })
 }
 
-export function editDevice({ suffix,  prefix,  deviceType,  saleStatus}) {
+export function updateManyDeviceNo(data) {
   return request({
-    url: '/device/fix/modify',
+    url: '/webapi/datacenter/device',
     method: 'post',
-    params:{suffix:suffix,  prefix:prefix,  deviceType:deviceType,  saleStatus:saleStatus}
+    data:data
+  })
+}
+
+export function editDevice(data) {
+  return request({
+    url: '/webapi/datacenter/device/fix/modify',
+    method: 'post',
+    data:qs.stringify(data)
   })
 }
 export function deleteDeviceById(id) {
   return request({
-    url: '/device/deletedevicebyid',
+    url: '/webapi/datacenter/device',
     method: 'post',
     params:{id}
   })

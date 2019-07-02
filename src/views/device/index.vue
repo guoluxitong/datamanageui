@@ -9,7 +9,7 @@
         @select="((item)=>{handleSelectuser(item)})"
       ></el-autocomplete>
       <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>
-      <el-input clearable v-model="listQuery.suffix" placeholder="设备编号"  style="width: 150px;"></el-input>
+      <el-input clearable v-model="suffix" placeholder="设备编号"  style="width: 150px;"></el-input>
       <el-button  type="primary" icon="el-icon-search" @click="handleSuffixFilter">查询</el-button>
       <el-button  type="primary" icon="el-icon-edit" @click="handleCreate">新增</el-button>
       <el-button  type="primary"  @click="handleDeviceType">设备类型管理</el-button>
@@ -48,12 +48,8 @@
     <div class="el-dialog-device">
       <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="40%">
         <el-form ref="DeviceFormData" :model="deviceFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
-          <el-row >
-            <el-col :span="12">
-              <el-form-item label="起始设备编号" prop="deviceSuffix">
-                <el-input v-model="deviceFormData.deviceSuffix"></el-input>
-              </el-form-item>
-            </el-col>
+
+          <el-row v-if="dialogStatus=='create'">
             <el-col :span="12">
               <el-form-item label="设备类型" prop="deviceType">
                 <el-autocomplete
@@ -62,13 +58,6 @@
                   placeholder="设备类型"
                   @select="((item)=>{handleSelectuser3(item)})"
                 ></el-autocomplete>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row v-if="deviceFormData.devicePrefix==''">
-            <el-col :span="12">
-              <el-form-item label="结束设备编号" prop="deviceSuffix">
-                <el-input v-model="deviceFormData.deviceSuffix"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -82,7 +71,7 @@
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row v-if="deviceFormData.devicePrefix!=''">
+          <el-row v-if="dialogStatus!='create'">
             <el-col :span="12">
               <el-form-item label="设备编码" prop="devicePrefix">
                 <el-input v-model="deviceFormData.devicePrefix"></el-input>
@@ -93,6 +82,33 @@
                 <el-select clearable class="filter-item" v-model="deviceFormData.status" >
                   <el-option v-for="item in statusArray1" :key="item.value" :label="item.label" :value="item.value"></el-option>
                 </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row >
+            <el-col v-if="dialogStatus=='create'" :span="12">
+              <el-form-item label="起始设备编号" prop="deviceSuffix">
+                <el-input v-model="deviceFormData.deviceSuffix"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col v-if="dialogStatus!='create'" :span="12">
+              <el-form-item label="设备编号" prop="deviceSuffix">
+                <el-input v-model="deviceFormData.deviceSuffix"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col  v-if="dialogStatus!='create'" :span="12">
+              <el-form-item label="设备类型" prop="deviceType">
+                <el-autocomplete
+                  v-model="deviceFormData.deviceType"
+                  :fetch-suggestions="querySearchAsyncuser3"
+                  placeholder="设备类型"
+                  @select="((item)=>{handleSelectuser3(item)})"
+                ></el-autocomplete>
+              </el-form-item>
+            </el-col>
+            <el-col  v-if="dialogStatus=='create'" :span="12">
+              <el-form-item label="结束设备编号" prop="deviceEndSuffix">
+                <el-input v-model="deviceFormData.deviceEndSuffix"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -144,17 +160,17 @@
       <div class="el-dialog-enterprise">
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dilogdeviceTypeVisible" width="30%">
           <el-form :rules="qRCodeRules" ref="deviceTypeForm" :model="deviceTypeFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
-            <el-form-item v-if="deviceTypeFormData.deviceType==''" label="设备类型名称" prop="deviceType">
+            <el-form-item  label="设备类型名称" prop="deviceType">
               <el-input v-model="deviceTypeFormData.deviceType"></el-input>
             </el-form-item>
-            <el-form-item v-if="deviceTypeFormData.deviceType!=''" label="设备类型" prop="deviceType">
+           <!-- <el-form-item v-if="dialogStatus!='create'" label="设备类型" prop="deviceType">
               <el-autocomplete
                 v-model="deviceFormData.deviceType"
                 :fetch-suggestions="querySearchAsyncuser3"
                 placeholder="设备类型"
                 @select="((item)=>{handleSelectuser3(item)})"
               ></el-autocomplete>
-            </el-form-item>
+            </el-form-item>-->
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dilogdeviceTypeVisible = false">取消</el-button>
@@ -169,15 +185,16 @@
 <script>
   import {fuelArray,mediumArray} from '@/utils/common'
   import {formatDateTime} from '@/utils/date'
-  import {getDeviceListByEnterpriseIdAndPage,getDeviceListByCustomerId,getDeviceListBySuffix,insertDevice,editDevice,deleteDeviceById} from '@/api/device'
+  import {getDeviceListByEnterpriseIdAndPage,getDeviceList,getDeviceListBySuffix,insertDevice,editDevice,deleteDeviceById} from '@/api/device'
   import {getEnterpriseListByConditionAndPage} from '@/api/enterprise'
   import {getCustomerListByConditionAndPage} from '@/api/customer'
-  import {getDeviceTypeListByConditionAndPage,editdeviceType,deletedeviceTypebyid} from '@/api/device-type'
+  import {getDeviceTypeListByConditionAndPage,createdeviceType,editdeviceType,deletedeviceTypebyid} from '@/api/device-type'
   export default {
     data() {
       return {
         list:[],
         deviceTypeList:[],
+        suffix:'',
        DeviceList1:
           {
             prefix:'',
@@ -185,7 +202,8 @@
             suffix:'',
             saleStatus:'',
           },
-        deviceList:
+        deviceList:[],
+        deviceAddList:
           {
             deviceType:'',
             enterpriseId:'',
@@ -253,6 +271,7 @@
         dialogFormVisible: false,
         deviceFormData: {
           devicePrefix: '',
+          deviceEndSuffix:'',
          status: '',
           enterpriseId:'',
           deviceType:'',
@@ -287,6 +306,7 @@
       }
     },
     created() {
+     /* this. getDeviceList()*/
     },
     methods: {
       querySearchAsyncuser(queryString, callback) {
@@ -382,7 +402,6 @@
         })
       },
       getList() {
-
         this.listLoading = true
         getDeviceListByEnterpriseIdAndPage(this.listQuery).then(response => {
           const data=response.data.data
@@ -392,7 +411,7 @@
       },
       getListBySuffix() {
         this.listLoading = true
-        getDeviceListBySuffix(this.listQuery.suffix).then(response => {
+        getDeviceListBySuffix(this.suffix).then(response => {
           const data=response.data.data
           this.deviceNoList=data;
           this.list.push(this.deviceNoList)
@@ -407,10 +426,9 @@
         this.listQuery.pageNum = 1;
         this.getListBySuffix()
       },
-      getCustomerList() {
-
+      getDeviceList() {
         this.listLoading = true
-        getDeviceListByCustomerId(this.listQuery).then(response => {
+        getDeviceList().then(response => {
           const data=response.data.data
           this.list=data
           this.listLoading = false
@@ -449,14 +467,31 @@
       editDeviceTypeData(){
         this.$refs.deviceTypeForm.validate(valid => {
           if (valid) {
-            editdeviceType(this.deviceTypeFormData).then(data=>{
-              this.dilogdeviceTypeVisible = false
-              this.$message({
-                message: '成功',
-                type: 'success'
-              });
-              this.getDeviceTypeList();
-            })
+            if( this.dialogStatus =='create'){
+              createdeviceType({
+                typeName:this.deviceTypeFormData.deviceType
+              }).then(data=>{
+                this.dilogdeviceTypeVisible = false
+                this.$message({
+                  message: '成功',
+                  type: 'success'
+                });
+                this.getDeviceTypeList();
+              })
+            }else{
+              editdeviceType({
+                typeName:this.deviceTypeFormData.deviceType,
+                id:this.deviceTypeFormData.id
+              }).then(data=>{
+                this.dilogdeviceTypeVisible = false
+                this.$message({
+                  message: '成功',
+                  type: 'success'
+                });
+                this.getDeviceTypeList();
+              })
+            }
+
           } else {
             return false
           }
@@ -506,13 +541,26 @@
       editData(){
         this.$refs.DeviceFormData.validate(valid => {
           if (valid) {
+
+            var deviceList =[];
             if( this.dialogStatus == 'create'){
-              this.deviceList.deviceType=this.deviceFormData.deviceType,
-                this.deviceList.enterpriseId=this.deviceFormData.enterpriseId,
-                this.deviceList.deviceSuffix=this.deviceFormData.deviceSuffix,
-                this.deviceList.subType=this.deviceFormData.deviceType,
-                this.deviceList.deviceNo=this.deviceFormData.deviceSuffix
-              insertDevice(this.deviceList).then(data=>{
+              for(var i=0 ; i<this.deviceFormData.deviceEndSuffix-this.deviceFormData.deviceSuffix+1;i++){
+                var deviceAddList={
+                  deviceType:'',
+                  enterpriseId:'',
+                  deviceSuffix:'',
+                  subType:'',
+                  deviceNo:''
+                };
+                deviceAddList.deviceType=this.deviceFormData.deviceType,
+                  deviceAddList.enterpriseId=this.deviceFormData.enterpriseId,
+                 deviceAddList.deviceSuffix=(parseInt(this.deviceFormData.deviceSuffix)+i).toString(),
+                  deviceAddList.subType=this.deviceFormData.deviceType,
+                  deviceAddList.deviceNo=(parseInt(this.deviceFormData.deviceSuffix)+i).toString()
+              deviceList.splice(i,0,deviceAddList)
+
+              }
+              insertDevice(deviceList).then(data=>{
                 this.dialogFormVisible = false
                 this.$message({
                   message: "成功",
@@ -530,6 +578,11 @@
                   message: "成功",
                   type: 'success'
                 });
+                if(this.suffix==''){
+                  this.getList()
+                }else{
+                  this. getListBySuffix();
+                }
               })
             }
             } else {

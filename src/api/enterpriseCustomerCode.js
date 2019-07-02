@@ -1,8 +1,8 @@
 import request from '@/utils/request'
-
+import qs from 'qs'
 export function enterprisecustomercodelist(query) {
   return request({
-    url: '/enterprisecustomercode/enterprisecustomercodelist',
+    url: '/webapi/datacenter/enterprise/customer/prefix/list',
     method: 'get',
     params: query
   })
@@ -11,9 +11,9 @@ export function enterprisecustomercodelist(query) {
 
 export function editenterprisecustomercode(data) {
     return request({
-        url: '/enterprisecustomercode/editenterprisecustomercode',
+        url: '/webapi/datacenter/enterprise/customer/prefix/create',
         method: 'post',
-        data:data
+        data:qs.stringify(data)
     })
 }
 

@@ -1,14 +1,14 @@
 import request from '@/utils/request'
-
+import qs from 'qs'
 export function getDeviceTypeList() {
   return request({
-    url: '/devicetype/getdevicetypelist',
+    url: '/webapi/datacenter/device/type/list',
     method: 'get'
   })
 }
 export function getDeviceTypeListByConditionAndPage(query) {
   return request({
-    url: '/devicetype/devicetypelistbyconditionandpage',
+    url: '/webapi/datacenter/device/type/list',
     method: 'get',
     params: query
 
@@ -16,14 +16,21 @@ export function getDeviceTypeListByConditionAndPage(query) {
 }
 export function editdeviceType(data) {
   return request({
-    url: '/devicetype/editdevicetype',
+    url: '/webapi/datacenter/device/type/modify',
     method: 'post',
-    data:data
+    data:qs.stringify(data)
+  })
+}
+export function createdeviceType(data) {
+  return request({
+    url: '/webapi/datacenter/device/type/create',
+    method: 'post',
+    data:qs.stringify(data)
   })
 }
 export function deletedeviceTypebyid(id) {
   return request({
-    url: '/devicetype/deletedevicetypebyid',
+    url: '/webapi/datacenter/device',
     method: 'post',
     params:{id}
   })

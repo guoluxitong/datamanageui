@@ -2,8 +2,8 @@
   <div class="app-container employee-container">
     <!--<el-row class="app-query">-->
       <!--<el-input v-model="listQuery.realName" placeholder="姓名"  style="width: 150px;"></el-input>-->
-      <!--<el-input v-model="listQuery.mobile" placeholder="电话"  style="width: 150px;"></el-input>-->
-      <!--<el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>-->
+      <el-input v-model="listQuery.mobile" placeholder="电话"  style="width: 150px;"></el-input>
+      <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>
       <el-button style="margin-left: 10px;" @click="handleCreate" type="primary" icon="el-icon-edit">新增</el-button>
     <!--</el-row>-->
 
@@ -50,7 +50,7 @@
     <div class="el-dialog-employee">
       <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="40%">
         <el-form :rules="rules" ref="employeeFormData" :model="employeeFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
-          <el-row>
+          <el-row v-if="dialogStatus=='create'">
             <el-col :span="12">
               <el-form-item label="组织类型">
                 <el-select class="filter-item" v-model="employeeFormData.orgType"  style="width: 100%" @change="orgTypeChange">
@@ -66,19 +66,19 @@
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
+          <el-row v-if="dialogStatus=='create'">
             <el-col :span="12">
               <el-form-item label="真实姓名" prop="realName">
                 <el-input v-model="employeeFormData.realName"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="电话" prop="mobile">
-                <el-input v-model="employeeFormData.mobile"></el-input>
+              <el-form-item label="QQ" prop="qQ">
+                <el-input v-model="employeeFormData.qQ"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
+          <el-row v-if="dialogStatus=='create'">
             <el-col :span="12">
               <el-form-item label="邮箱"  prop="email">
                 <el-input v-model="employeeFormData.email"></el-input>
@@ -92,17 +92,17 @@
           </el-row>
           <el-row>
             <el-col :span="12">
-              <el-form-item label="QQ" prop="qQ">
-                <el-input v-model="employeeFormData.qQ"></el-input>
+              <el-form-item label="电话" prop="mobile">
+                <el-input v-model="employeeFormData.mobile"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="密码" prop="password">
-                <el-input type="password" v-model="employeeFormData.password"></el-input>
+                <el-input  v-model="employeeFormData.password"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
+          <el-row v-if="dialogStatus=='create'">
             <el-col :span="12">
               <el-form-item label="是否可用" prop="status">
                 <el-select class="filter-item" v-model="employeeFormData.status"  style="width: 100%">
@@ -111,7 +111,7 @@
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
+          <el-row v-if="dialogStatus=='create'">
             <el-form-item label="备注">
               <el-input type="textarea" v-model="employeeFormData.mark"></el-input>
             </el-form-item>
@@ -139,10 +139,10 @@
 
 <script>
   import {validateRealName,validatePassWord,validatePhone,validateQQ,validateEmail} from '@/utils/validate'
-  import {getEmployeeListByConditionAndPage,editEmployee,editEmployeeRole,deleteEmployeeById} from '@/api/employee'
+  import {getEmployeeListByConditionAndPage,editEmployee,createEmployee,getEmployeeInfoByMobile,editEmployeeRole,deleteEmployeeById} from '@/api/employee'
   import {getRoleListByCondition,getRoleListByEmployeeId} from '@/api/role'
   import {getEnterpriseListByConditionAndPage} from '@/api/enterprise'
-  import {enterprisecustomerlist} from '@/api/enterpriseCustomer'
+  import {getCustomerListByConditionAndPage} from '@/api/customer'
   export default {
     data() {
       const validateCustomerFun = (rule, value, callback) => {
@@ -172,7 +172,7 @@
 
         this.listQuery.mobile=value
         getEmployeeListByConditionAndPage(this.listQuery).then(response => {
-          if(response.data.data.list.length>0&this.dialogStatus =="create"){
+          if(response.data.data.length>0&this.dialogStatus =="create"){
             var exist=1
           }
           if(value.length<=0){
@@ -206,7 +206,7 @@
         }
       }
       return {
-        list: null,
+        list: [],
         listQuery: {
           total:50,
           pageNum:1,
@@ -214,6 +214,7 @@
           realName:null,
           mobile:null,
         },
+        employeeList:{},
         organizationType: [
           {label:"系统管理员",value:0},
           {label:"公司用户",value:1},
@@ -280,8 +281,8 @@
     },
     created() {
       this.getList()
-      this.initEnterpriseList()
-     /* this.initCustomerList()*/
+     /* this.initEnterpriseList()
+     this.initCustomerList()*/
     },
     methods: {
       initEnterpriseList(){
@@ -295,7 +296,7 @@
       },
       initCustomerList(){
         let customerOption=[]
-        enterprisecustomerlist().then(data=>{
+        getCustomerListByConditionAndPage().then(data=>{
           data.data.data.forEach(item=>{
             customerOption.push({value:item.id+"",label:item.customerName})
           })
@@ -306,17 +307,25 @@
         this.$refs.menuContext.openTableMenu(row,event);
       },
       handleFilter() {
-        this.listQuery.pageNum = 1
-        this.getList()
+        this.getListByMobile()
       },
       getList() {
         this.listLoading = true
-        getEmployeeListByConditionAndPage(this.listQuery).then(response => {
+        getEmployeeListByConditionAndPage().then(response => {
           const data=response.data.data
-          this.list=data.list
-          this.listQuery.total=data.total
-          this.listQuery.pageNum=data.pageNum
-          this.listQuery.pageSize=data.pageSize
+          this.list=data
+          this.listLoading = false
+        })
+      },
+      getListByMobile() {
+        this.listLoading = true
+        this.list=[];
+        getEmployeeInfoByMobile(
+         this.listQuery.mobile
+        ).then(response => {
+          const data=response.data.data
+          this.employeeList=data;
+          this.list.push(this.employeeList)
           this.listLoading = false
         })
       },
@@ -370,18 +379,28 @@
       editData(){
         this.$refs.employeeFormData.validate(valid => {
           if (valid) {
-
-            var d = new Date(this.employeeFormData.lastLoginDatetime);
-            this.employeeFormData.lastLoginDatetime=d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
-            editEmployee(this.employeeFormData).then(data=>{
-              this.dialogFormVisible = false
-              console.log(data)
-              this.$message({
+            if(this.dialogStatus =='create'){
+              createEmployee(this.employeeFormData).then(data=>{
+                this.dialogFormVisible = false
+                this.$message({
                   message: data.data.msg,
-                type: 'success'
-              });
-              this.getList()
-            })
+                  type: 'success'
+                });
+                this.getList()
+              })
+            }else{
+              editEmployee({
+                loginId:this.employeeFormData.mobile,
+                password:this.employeeFormData.password
+              }).then(data=>{
+                this.dialogFormVisible = false
+                this.$message({
+                  message: data.data.msg,
+                  type: 'success'
+                });
+                this.getList()
+              })
+            }
           } else {
             return false
           }

@@ -1,8 +1,8 @@
 import request from '@/utils/request'
-
+import qs from 'qs'
 export function enterprisecodelist(query) {
   return request({
-    url: '/enterprisecode/enterprisecodelist',
+    url: '/webapi/datacenter/enterprise/prefix/list',
     method: 'get',
     params: query
   })
@@ -11,9 +11,15 @@ export function enterprisecodelist(query) {
 
 export function editenterprisecode(data) {
     return request({
-        url: '/enterprisecode/editenterprisecode',
+        url: '/webapi/datacenter/enterprise/prefix/modify',
         method: 'post',
-        data:data
+        data:qs.stringify(data)
     })
 }
-
+export function createPrefix(data) {
+  return request({
+    url: '/webapi/datacenter/enterprise/prefix/create',
+    method: 'post',
+    data:qs.stringify(data)
+  })
+}

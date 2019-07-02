@@ -52,7 +52,7 @@
 </template>
 
 <script>
-    import {enduserlist,editenduser} from '@/api/enduser'
+    import {enduserlist,editenduser,create} from '@/api/enduser'
     export default {
         data() {
             const validateEnterpriseFun = (rule, value, callback) => {
@@ -113,7 +113,7 @@
             },
             getList() {
                 this.listLoading = true
-                enduserlist(this.listQuery).then(response => {
+                enduserlist().then(response => {
 
                     const data=response.data.data
 
@@ -125,10 +125,8 @@
             resetTemp() {
                 this.customerFormData = {
                     id:'',
-                    enterpriseId:'',
                     endUserName:'',
                     status:1,
-                    customerNo:''
                 }
             },
             handleCreate() {
@@ -150,14 +148,32 @@
             editData(){
                 this.$refs.customerForm.validate(valid => {
                     if (valid) {
-                        editenduser(this.customerFormData).then(data=>{
-                            this.dialogFormVisible = false
-                            this.$message({
-                                message: '成功',
-                                type: 'success'
-                            });
-                            this.getList()
+                      if( this.dialogStatus =='create'){
+                        create({
+                          endUserName:this.customerFormData.endUserName,
+                          status:this.customerFormData.status,
+                        }).then(data=>{
+                          this.dialogFormVisible = false
+                          this.$message({
+                            message: '成功',
+                            type: 'success'
+                          });
+                          this.getList()
                         })
+                      }else{
+                        editenduser({
+                          id:this.customerFormData.id,
+                          endUserName:this.customerFormData.endUserName,
+                          status:this.customerFormData.status,
+                        }).then(data=>{
+                          this.dialogFormVisible = false
+                          this.$message({
+                            message: '成功',
+                            type: 'success'
+                          });
+                          this.getList()
+                        })
+                      }
                     } else {
                         return false
                     }
