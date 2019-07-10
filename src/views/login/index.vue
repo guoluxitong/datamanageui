@@ -5,7 +5,7 @@
       <el-input type="text" v-model="loginForm.account" auto-complete="off" placeholder="账号"></el-input>
     </el-form-item>
     <el-form-item prop="passWord">
-      <el-input type="password" v-model="loginForm.passWord" auto-complete="off" placeholder="密码"></el-input>
+      <el-input type="password" v-model="loginForm.password" auto-complete="off" placeholder="密码"></el-input>
     </el-form-item>
     <el-form-item v-show="false" prop="orgType">
       <el-input type="password" v-model="loginForm.orgType" auto-complete="off" ></el-input>
@@ -24,14 +24,14 @@
         loading: false,
         loginForm: {
           account: '',
-          passWord: '',
-          orgType:3
+          password: '',
+          orgType:0
         },
         rules: {
           account: [
             { required: true, message: '请输入账号', trigger: 'blur' }
           ],
-          passWord: [
+          password: [
             { required: true, message: '请输入密码', trigger: 'blur' }
           ]
         },
@@ -40,7 +40,7 @@
     },
     methods: {
       handleLogin() {
-        this.loginForm.orgType=3
+        this.loginForm.orgType=0
         this.$refs.loginForm.validate(valid => {
           if (valid) {
             this.loading = true
@@ -48,7 +48,9 @@
             this.$store.dispatch('login', this.loginForm).then(() => {
               this.loading = false
               this.$router.push({ path: this.redirect || '/home/index' })
+
             }).catch((msg) => {
+
               this.$message.error(msg);
               this.loading = false
                console.log('xxxxxxxxxxxxxxxxxxxxxxxxx')

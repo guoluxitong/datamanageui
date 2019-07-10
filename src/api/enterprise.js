@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-
+import qs from 'qs'
 export function getEnterpriseListByConditionAndPage(query) {
     return request({
         url: '/webapi/datacenter/enterprise/list',
@@ -7,25 +7,24 @@ export function getEnterpriseListByConditionAndPage(query) {
         params: query
     })
 }
-
-export function getEnterpriseListByCondition(query) {
-    return request({
-        url: '/enterprise/enterpriselistbycondition',
-        method: 'get',
-        params: query
-    })
-}
-
 export function editEnterprise(data) {
     return request({
-        url: '/enterprise/editenterprise',
+        url: '/webapi/datacenter/enterprise/modify',
         method: 'post',
-        data:data
+        data:qs.stringify(data)
     })
 }
+export function create(data) {
+  return request({
+    url: '/webapi/datacenter/enterprise/create',
+    method: 'post',
+    data:qs.stringify(data)
+  })
+}
+
 export function deleteEnterpriseById(id) {
     return request({
-        url: '/enterprise/deleteenterprisebyid',
+        url: '/webapi/datacenter/enterprise',
         method: 'post',
         params:{id}
     })

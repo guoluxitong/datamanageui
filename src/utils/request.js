@@ -6,7 +6,7 @@ const service = axios.create({
   
   baseURL: '/api',
   timeout: 5000
-})
+});
 service.interceptors.request.use(
   config => {
     return config
@@ -14,7 +14,7 @@ service.interceptors.request.use(
   error => {
     Promise.reject(error)
   }
-)
+);
 service.interceptors.response.use(
   response => response,
   error => {
@@ -22,8 +22,8 @@ service.interceptors.response.use(
       message: error.message,
       type: 'error',
       duration: 5 * 1000
-    })
+    });
     return Promise.reject(error)
   }
-)
+);
 export default service

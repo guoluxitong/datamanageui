@@ -52,7 +52,7 @@
 </template>
 
 <script>
-    import {getCustomerListByConditionAndPage,editCustomer,deleteCustomerById} from '@/api/customer'
+    import {getCustomerListByConditionAndPage,editCustomer,create} from '@/api/customer'
     export default {
         data() {
             const validateEnterpriseFun = (rule, value, callback) => {
@@ -113,7 +113,7 @@
             },
             getList() {
                 this.listLoading = true
-                getCustomerListByConditionAndPage(this.listQuery).then(response => {
+                getCustomerListByConditionAndPage().then(response => {
 
                     const data=response.data.data
 
@@ -125,15 +125,13 @@
             resetTemp() {
                 this.customerFormData = {
                     id:'',
-                    enterpriseId:'',
                     customerName:'',
                     status:1,
-                    customerNo:''
                 }
             },
             handleCreate() {
                 this.resetTemp()
-                this.dialogStatus = 'create'
+                this.dialogStatus ='create'
                 this.dialogFormVisible = true
                 this.$nextTick(() => {
                     this.$refs['customerForm'].clearValidate()
@@ -150,14 +148,32 @@
             editData(){
                 this.$refs.customerForm.validate(valid => {
                     if (valid) {
-                        editCustomer(this.customerFormData).then(data=>{
-                            this.dialogFormVisible = false
-                            this.$message({
-                                message: '成功',
-                                type: 'success'
-                            });
-                            this.getList()
+                      if( this.dialogStatus =='create'){
+                        create({
+                          customerName:this.customerFormData.customerName,
+                          status:this.customerFormData.status,
+                        }).then(data=>{
+                          this.dialogFormVisible = false
+                          this.$message({
+                            message: '成功',
+                            type: 'success'
+                          });
+                          this.getList()
                         })
+                      }else{
+                        editCustomer({
+                          id:this.customerFormData.id,
+                          customerName:this.customerFormData.customerName,
+                          status:this.customerFormData.status,
+                        }).then(data=>{
+                          this.dialogFormVisible = false
+                          this.$message({
+                            message: '成功',
+                            type: 'success'
+                          });
+                          this.getList()
+                        })
+                      }
                     } else {
                         return false
                     }
