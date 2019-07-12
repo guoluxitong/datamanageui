@@ -52,7 +52,7 @@
 </template>
 
 <script>
-    import {agentlist,editagent} from '@/api/agent'
+    import {agentlist,editagent,create} from '@/api/agent'
     export default {
         data() {
             const validateEnterpriseFun = (rule, value, callback) => {
@@ -125,10 +125,8 @@
             resetTemp() {
                 this.customerFormData = {
                     id:'',
-                    enterpriseId:'',
                     agentName:'',
                     status:1,
-                    customerNo:''
                 }
             },
             handleCreate() {
@@ -150,14 +148,32 @@
             editData(){
                 this.$refs.customerForm.validate(valid => {
                     if (valid) {
-                        editagent(this.customerFormData).then(data=>{
-                            this.dialogFormVisible = false
-                            this.$message({
-                                message: '成功',
-                                type: 'success'
-                            });
-                            this.getList()
+                      if(this.dialogStatus =='create'){
+                        create({
+                          agentName:this.customerFormData.agentName,
+                          status:this.customerFormData.status
+                        }).then(data=>{
+                          this.dialogFormVisible = false
+                          this.$message({
+                            message: '成功',
+                            type: 'success'
+                          });
+                          this.getList()
                         })
+                      }else{
+                        editagent({
+                          id:this.customerFormData.id,
+                          agentName:this.customerFormData.agentName,
+                          status:this.customerFormData.status
+                        }).then(data=>{
+                          this.dialogFormVisible = false
+                          this.$message({
+                            message: '成功',
+                            type: 'success'
+                          });
+                          this.getList()
+                        })
+                      }
                     } else {
                         return false
                     }

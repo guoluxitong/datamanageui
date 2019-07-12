@@ -2,18 +2,24 @@ import request from '@/utils/request'
 
 export function companylist(query) {
   return request({
-    url: '/company/companylist',
+    url: '/webapi/datacenter/company/list',
     method: 'get',
     params: query
   })
 }
 
 
-export function editcompany(data) {
+export function create(data) {
     return request({
-        url: '/company/editcompany',
+        url: '/webapi/datacenter/company/create',
         method: 'post',
         data:data
     })
 }
-
+export function editcompany(data) {
+  return request({
+    url: '/webapi/datacenter/company/modify',
+    method: 'post',
+    data:data
+  })
+}

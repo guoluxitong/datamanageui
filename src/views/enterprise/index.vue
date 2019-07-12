@@ -85,7 +85,7 @@
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogCustomerFormVisible" width="30%">
           <el-form :rules="rules" ref="enterprisecustomerForm" :model="enterprisecustomerFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
 
-            <el-form-item label="企业" prop="enterpriseId">
+            <el-form-item v-if="dialogStatus=='create'" label="企业" prop="enterpriseId">
               <el-autocomplete
                 v-model="enterpriseName"
                 :fetch-suggestions="querySearchAsyncuser"
@@ -115,12 +115,6 @@
             <span>{{scope.row.customerName}}</span>
           </template>
         </el-table-column>
-        <el-table-column :show-overflow-tooltip="true" align="left" label="编号后缀">
-          <template slot-scope="scope">
-            <span>{{scope.row.codePrefix}}</span>
-          </template>
-        </el-table-column>
-
         <el-table-column :show-overflow-tooltip="true" align="left" label="编号">
           <template slot-scope="scope">
             <span>{{scope.row.code}}</span>
@@ -181,7 +175,7 @@
       <div class="el-dialog-customer">
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogCodeFormVisible" width="30%">
           <el-form :rules="rules" ref="enterpriseForm" :model="enterpriseCodeFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
-            <el-form-item label="企业" prop="enterpriseId">
+            <el-form-item v-if="dialogStatus =='create'" label="企业" prop="enterpriseId">
               <el-autocomplete
                 v-model="enterpriseName"
                 :fetch-suggestions="querySearchAsyncuser"
@@ -189,7 +183,7 @@
                 @select="((item)=>{handleSelectuser(item)})"
               ></el-autocomplete>
             </el-form-item>
-            <el-form-item label="编号" prop="codePrefix">
+            <el-form-item v-if="dialogStatus =='create'"  label="编号" prop="codePrefix">
               <el-input v-model="enterpriseCodeFormData.codePrefix"></el-input>
             </el-form-item>
             <el-form-item label="是否可用">
@@ -210,9 +204,9 @@
 </template>
 
 <script>
-    import {getEnterpriseListByConditionAndPage,editEnterprise,deleteEnterpriseById} from '@/api/enterprise'
-    import {enterprisecodelist,editenterprisecode} from '@/api/enterpriseCode'
-    import {enterprisecustomerlist,editenterprisecustomer} from '@/api/enterpriseCustomer'
+    import {getEnterpriseListByConditionAndPage,editEnterprise,create,deleteEnterpriseById} from '@/api/enterprise'
+    import {enterprisecodelist,editenterprisecode,createPrefix} from '@/api/enterpriseCode'
+    import {enterprisecustomerlist,editenterprisecustomer,createcustomer} from '@/api/enterpriseCustomer'
     import {enterprisecustomercodelist,editenterprisecustomercode} from '@/api/enterpriseCustomerCode'
     export default {
         data() {
@@ -274,13 +268,16 @@
                     status:1
                 },
               enterpriseCodeFormData: {
+                  id:'',
                 enterpriseId:"",
                 codePrefix: '',
                 status:1
               },
               enterprisecustomerFormData: {
                 enterpriseId:'',
-                customerName:''
+                customerName:'',
+                id:'',
+                status:1
               },
               enterprisecustomerCodeFormData: {
                 enterpriseCustomerId:"",
@@ -348,6 +345,7 @@
             this.enterprisecodevisible=1;
             this.listQuery1.enterpriseId=row.id;
             this.enterpriseName=row.enterpriseName;
+            this.enterprisecustomerFormData.status=row.status;
             this.getCustomerList()
           },
           enterprise(index,row){
@@ -357,7 +355,7 @@
           },
           getEnterpriseList() {
             this.listLoading = true;
-            enterprisecodelist(this.listQuery3).then(response => {
+            enterprisecodelist().then(response => {
               console.log(response);
               const data=response.data.data;
               this.enterpriseCodeList=data;
@@ -392,7 +390,7 @@
             },
             getList() {
                 this.listLoading = true;
-                getEnterpriseListByConditionAndPage(this.listQuery).then(response => {
+                getEnterpriseListByConditionAndPage().then(response => {
                   const data=response.data.data;
                   this.list=data;
                   this.listLoading = false
@@ -428,7 +426,7 @@
           },
           handleEnterpriseCreate(){
             this.enterpriseCodeFormData={
-              enterpriseId:"",
+              enterpriseId:'',
                 codePrefix: '',
                 status:1
             };
@@ -448,6 +446,7 @@
             },
           handleCustomerCreate() {
             this.enterprisecustomerFormData={
+                  id:'',
                 enterpriseId:'',
                 customerName:''
             };
@@ -476,14 +475,31 @@
           editEnterpriseData(){
             this.$refs.enterpriseForm.validate(valid => {
               if (valid) {
-                editenterprisecode(this.enterpriseCodeFormData).then(data=>{
-                  this.dialogCodeFormVisible = false;
-                  this.$message({
-                    message: '成功',
-                    type: 'success'
-                  });
-                  this.getEnterpriseList()
-                })
+                if(  this.dialogStatus =='create'){
+                  createPrefix({
+                    enterpriseId:this.enterpriseCodeFormData.enterpriseId,
+                    prefix: this.enterpriseCodeFormData.codePrefix,
+                  }).then(data=>{
+                    this.dialogCodeFormVisible = false;
+                    this.$message({
+                      message: '成功',
+                      type: 'success'
+                    });
+                    this.getEnterpriseList()
+                  })
+                }else{
+                  editenterprisecode({
+                    enterpriseId:this.enterpriseCodeFormData.id,
+                    status: this.enterpriseCodeFormData.status,
+                  }).then(data=>{
+                    this.dialogCodeFormVisible = false;
+                    this.$message({
+                      message: '成功',
+                      type: 'success'
+                    });
+                    this.getEnterpriseList()
+                  })
+                }
               } else {
                 return false
               }
@@ -493,7 +509,10 @@
             this.enterprisecustomerCodeFormData.enterpriseCustomerId=this.enterpriseCustomerId;
             this.$refs.customerForm.validate(valid => {
               if (valid) {
-                editenterprisecustomercode(this.enterprisecustomerCodeFormData).then(data=>{
+                editenterprisecustomercode({
+                  enterpriseCustomerId:this.enterprisecustomerCodeFormData.enterpriseCustomerId,
+                  code:this.enterprisecustomerCodeFormData.code,
+                }).then(data=>{
                   this.dialogCustomerCodeFormVisible = false;
                   this.$message({
                     message: '成功',
@@ -509,14 +528,33 @@
           editCustomerData(){
             this.$refs.enterprisecustomerForm.validate(valid => {
               if (valid) {
-            editenterprisecustomer(this.enterprisecustomerFormData).then(data=>{
-                  this.dialogCustomerFormVisible = false;
-                  this.$message({
-                    message: '成功',
-                    type: 'success'
-                  });
-                  this.getCustomerList()
-                })
+                if(this.dialogStatus =='create'){
+                  createcustomer({
+                    enterpriseId:this.enterprisecustomerFormData.enterpriseId,
+                    customerName:this.enterprisecustomerFormData.customerName,
+                    status:1
+                  }).then(data=>{
+                    this.dialogCustomerFormVisible = false;
+                    this.$message({
+                      message: '成功',
+                      type: 'success'
+                    });
+                    this.getCustomerList()
+                  })
+                }else{
+                  editenterprisecustomer({
+                    id:this.enterprisecustomerFormData.id,
+                    customerName:this.enterprisecustomerFormData.customerName,
+                  }).then(data=>{
+                    this.dialogCustomerFormVisible = false;
+                    this.$message({
+                      message: '成功',
+                      type: 'success'
+                    });
+                    this.getCustomerList()
+                  })
+                }
+
           } else {
             return false
           }
@@ -533,14 +571,33 @@
             editData(){
               this.$refs.enterpriseForm.validate(valid => {
                 if (valid) {
-                        editEnterprise(this.enterpriseFormData).then(data=>{
-                            this.dialogFormVisible = false;
-                            this.$message({
-                                message: '成功',
-                                type: 'success'
-                            });
-                            this.getList()
-                        })
+                  if( this.dialogStatus =='create'){
+                    create({
+                      enterpriseName:this.enterpriseFormData.enterpriseName,
+                      status:this.enterpriseFormData.status
+                    }).then(data=>{
+                      this.dialogFormVisible = false;
+                      this.$message({
+                        message: '成功',
+                        type: 'success'
+                      });
+                      this.getList()
+                    })
+                  }else{
+                    editEnterprise({
+                      id:this.enterpriseFormData.id,
+                      enterpriseName:this.enterpriseFormData.enterpriseName,
+                      status:this.enterpriseFormData.status
+                    }).then(data=>{
+                      this.dialogFormVisible = false;
+                      this.$message({
+                        message: '成功',
+                        type: 'success'
+                      });
+                      this.getList()
+                    })
+                  }
+
                 } else {
                   return false
                 }

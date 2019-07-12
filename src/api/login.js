@@ -1,8 +1,10 @@
 import request from '@/utils/request'
-export function login(account, password, orgType) {
+
+export function login(loginId, password) {
+
   return request({
-    url: '/webapi/login',
+    url: '/account/datamanage/login',
     method: 'post',
-    data:{ "loginid": account, "password": password,"orgtype":orgType()}
+    params: { loginId, password }
   })
 }

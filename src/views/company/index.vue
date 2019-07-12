@@ -52,7 +52,7 @@
 </template>
 
 <script>
-    import {companylist,editcompany} from '@/api/company'
+    import {companylist,editcompany,create} from '@/api/company'
     export default {
         data() {
             const validateEnterpriseFun = (rule, value, callback) => {
@@ -113,7 +113,7 @@
             },
             getList() {
                 this.listLoading = true
-                companylist(this.listQuery).then(response => {
+                companylist().then(response => {
 
                     const data=response.data.data
 
@@ -125,10 +125,8 @@
             resetTemp() {
                 this.customerFormData = {
                     id:'',
-                    enterpriseId:'',
                     companyName:'',
                     status:1,
-                    customerNo:''
                 }
             },
             handleCreate() {
@@ -150,14 +148,26 @@
             editData(){
                 this.$refs.customerForm.validate(valid => {
                     if (valid) {
-                        editcompany(this.customerFormData).then(data=>{
-                            this.dialogFormVisible = false
-                            this.$message({
-                                message: '成功',
-                                type: 'success'
-                            });
-                            this.getList()
+                      if( this.dialogStatus = 'create'){
+                        create(this.customerFormData).then(data=>{
+                          this.dialogFormVisible = false
+                          this.$message({
+                            message: '成功',
+                            type: 'success'
+                          });
+                          this.getList()
                         })
+                      }else{
+                        editcompany(this.customerFormData).then(data=>{
+                          this.dialogFormVisible = false
+                          this.$message({
+                            message: '成功',
+                            type: 'success'
+                          });
+                          this.getList()
+                        })
+                      }
+
                     } else {
                         return false
                     }

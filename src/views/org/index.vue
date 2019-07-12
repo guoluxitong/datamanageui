@@ -36,7 +36,7 @@
           <el-form-item label="组织名称" prop="orgTypeName">
             <el-input v-model="customerFormData.orgTypeName"></el-input>
           </el-form-item>
-          <el-form-item label="组织编号" prop="orgTypeName">
+          <el-form-item v-if="dialogorgType=='create'" label="组织编号" prop="orgTypeName">
             <el-input v-model="customerFormData.orgType"></el-input>
           </el-form-item>
         </el-form>
@@ -50,7 +50,7 @@
 </template>
 
 <script>
-    import {orglist,editorg} from '@/api/org'
+    import {orglist,editorg,create} from '@/api/org'
     export default {
         data() {
             const validateEnterpriseFun = (rule, value, callback) => {
@@ -80,7 +80,6 @@
                 dialogorgType: '',
                 dialogFormVisible: false,
                 customerFormData: {
-                    id:'',
                     orgTypeName:'',
                     orgType:1,
                 },
@@ -111,7 +110,7 @@
             },
             getList() {
                 this.listLoading = true
-                orglist(this.listQuery).then(response => {
+                orglist().then(response => {
 
                     const data=response.data.data
 
@@ -122,11 +121,8 @@
             },
             resetTemp() {
                 this.customerFormData = {
-                    id:'',
-                    enterpriseId:'',
                     orgTypeName:'',
-                    orgType:1,
-                    customerNo:''
+                    orgType:'',
                 }
             },
             handleCreate() {
@@ -148,14 +144,31 @@
             editData(){
                 this.$refs.customerForm.validate(valid => {
                     if (valid) {
-                        editorg(this.customerFormData).then(data=>{
-                            this.dialogFormVisible = false
-                            this.$message({
-                                message: '成功',
-                                type: 'success'
-                            });
-                            this.getList()
+                      if( this.dialogorgType =='create'){
+                        create({
+                          orgTypeName:this.customerFormData.orgTypeName,
+                          orgType:this.customerFormData.orgType
+                        }).then(data=>{
+                          this.dialogFormVisible = false
+                          this.$message({
+                            message: '成功',
+                            type: 'success'
+                          });
+                          this.getList()
                         })
+                      }else{
+                        editorg({
+                          orgTypeName:this.customerFormData.orgTypeName,
+                          orgType:this.customerFormData.orgType
+                        }).then(data=>{
+                          this.dialogFormVisible = false
+                          this.$message({
+                            message: '成功',
+                            type: 'success'
+                          });
+                          this.getList()
+                        })
+                      }
                     } else {
                         return false
                     }
