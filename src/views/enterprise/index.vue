@@ -4,7 +4,12 @@
     <el-row class="app-query">
       <!--<el-input v-model="listQuery.enterpriseName" placeholder="企业名称"  style="width: 150px;"></el-input>-->
       <!--<el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>-->
-      <el-button style="margin-left: 10px;" @click="handleCreate" type="primary" icon="el-icon-edit">新增</el-button>
+      <el-col :span="2">
+      <el-button style="margin-left: 10px;" @click="handleCreate" type="success" icon="el-icon-plus">新增</el-button>
+      </el-col>
+      <el-col :span="2">
+      <el-button  type="primary" @click="enterprise">企业编号管理</el-button>
+      </el-col>
     </el-row>
 
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
@@ -21,7 +26,6 @@
       <el-table-column  align='center' label="操作">
         <template slot-scope="scope">
           <el-button size="mini" type="success" @click="customer(scope.$index, scope.row)">企业客户管理</el-button>
-          <el-button size="mini" type="success" @click="enterprise(scope.$index, scope.row)">企业编号管理</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -46,15 +50,21 @@
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">取消</el-button>
           <el-button type="primary" @click="editData">确认</el-button>
+          <el-button icon="el-icon-back" type="warning" @click="dialogFormVisible = false">取消</el-button>
         </div>
       </el-dialog>
     </div>
   </div>
     <div v-if="enterprisecodevisible===1">
-      <el-button style="margin-left: 10px;" @click="handleCustomerCreate" type="primary" icon="el-icon-edit">新增</el-button>
-      <el-button style="margin-left: 80%;" @click="handleCancel" type="primary" >取消</el-button>
+      <el-row>
+        <el-col :span="22">
+      <el-button  @click="handleCustomerCreate" type="success" icon="el-icon-plus">新增</el-button>
+        </el-col>
+        <el-col :span="2">
+      <el-button icon="el-icon-back" type="warning" @click="handleCancel"  >取消</el-button>
+        </el-col>
+      </el-row>
       <el-table :data="customerList" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
 
         <el-table-column :show-overflow-tooltip="true" align="left" label="企业名称">
@@ -99,15 +109,21 @@
 
           </el-form>
           <div slot="footer" class="dialog-footer">
-            <el-button @click="dialogCustomerFormVisible = false">取消</el-button>
             <el-button type="primary" @click="editCustomerData">确认</el-button>
+            <el-button icon="el-icon-back" type="warning" @click="dialogCustomerFormVisible = false">取消</el-button>
           </div>
         </el-dialog>
       </div>
     </div>
     <div v-if="enterprisecodevisible===2">
-      <el-button style="margin-left: 10px;" @click="handleCodeCreate" type="primary" icon="el-icon-edit">新增</el-button>
-      <el-button style="margin-left: 80%;" @click="handleCodeCancel" type="primary" >取消</el-button>
+      <el-row>
+        <el-col :span="22">
+      <el-button  @click="handleCodeCreate" type="primary" icon="el-icon-edit">新增</el-button>
+        </el-col>
+        <el-col :span="2">
+      <el-button  @click="handleCodeCancel" icon="el-icon-back" type="warning" >取消</el-button>
+        </el-col>
+      </el-row>
       <el-table :data="customerCodeList" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" >
 
         <el-table-column :show-overflow-tooltip="true" align="left" label="客户名称">
@@ -129,24 +145,26 @@
       <div class="el-dialog-customer">
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogCustomerCodeFormVisible" width="30%">
           <el-form :rules="rules" ref="customerForm" :model="enterprisecustomerCodeFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
-
-            <el-form-item label="企业客户" >
-              <el-input v-model="enterpriseCustomerId"></el-input>
-            </el-form-item>
             <el-form-item label="编号" prop="code">
               <el-input v-model="enterprisecustomerCodeFormData.code"></el-input>
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
-            <el-button @click="dialogCustomerCodeFormVisible = false">取消</el-button>
             <el-button type="primary" @click="editCodeData">确认</el-button>
+            <el-button icon="el-icon-back" type="warning" @click="dialogCustomerCodeFormVisible = false">取消</el-button>
           </div>
         </el-dialog>
       </div>
     </div >
     <div  v-if="enterprisecodevisible===3">
-      <el-button style="margin-left: 10px;" @click="handleEnterpriseCreate" type="primary" icon="el-icon-edit">新增</el-button>
-      <el-button style="margin-left: 80%;" @click="handleEnterpriseCancel" type="primary" >取消</el-button>
+      <el-row>
+        <el-col :span="22">
+      <el-button @click="handleEnterpriseCreate" type="success" icon="el-icon-plus">新增</el-button>
+        </el-col>
+        <el-col :span="2">
+      <el-button icon="el-icon-back" type="warning" @click="handleEnterpriseCancel"  >取消</el-button>
+        </el-col>
+      </el-row>
       <el-table :data="enterpriseCodeList" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
         <el-table-column :show-overflow-tooltip="true" align="left" label="企业名称">
           <template slot-scope="scope">
@@ -194,8 +212,8 @@
 
           </el-form>
           <div slot="footer" class="dialog-footer">
-            <el-button @click="dialogCodeFormVisible = false">取消</el-button>
             <el-button type="primary" @click="editEnterpriseData">确认</el-button>
+            <el-button icon="el-icon-back" type="warning" @click="dialogCodeFormVisible = false">取消</el-button>
           </div>
         </el-dialog>
       </div>
@@ -348,9 +366,8 @@
             this.enterprisecustomerFormData.status=row.status;
             this.getCustomerList()
           },
-          enterprise(index,row){
+          enterprise(){
             this.enterprisecodevisible=3;
-            this.listQuery3.enterpriseId=row.id;
             this.getEnterpriseList()
           },
           getEnterpriseList() {

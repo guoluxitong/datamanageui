@@ -2,17 +2,29 @@
   <div>
   <div v-if="!deviceTypeVisible" class="app-container">
     <el-row class="app-query">
+      <el-col :span="3">
       <el-autocomplete
         v-model="enterpriseList.enterpriseName"
         :fetch-suggestions="querySearchAsyncuser"
         placeholder="所属企业"
         @select="((item)=>{handleSelectuser(item)})"
       ></el-autocomplete>
+      </el-col>
+      <el-col :span="2">
       <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>
+      </el-col>
+      <el-col :span="3">
       <el-input clearable v-model="suffix" placeholder="设备编号"  style="width: 150px;"></el-input>
+      </el-col>
+      <el-col :span="2">
       <el-button  type="primary" icon="el-icon-search" @click="handleSuffixFilter">查询</el-button>
-      <el-button  type="primary" icon="el-icon-edit" @click="handleCreate">新增</el-button>
+      </el-col>
+      <el-col :span="2">
+      <el-button  type="success" icon="el-icon-plus" @click="handleCreate">新增</el-button>
+      </el-col>
+      <el-col :span="2">
       <el-button  type="primary"  @click="handleDeviceType">设备类型管理</el-button>
+      </el-col>
     </el-row>
 
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
@@ -114,8 +126,8 @@
           </el-row>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">取消</el-button>
           <el-button type="primary" @click="editData">确认</el-button>
+          <el-button icon="el-icon-back" type="warning" @click="dialogFormVisible = false">取消</el-button>
         </div>
       </el-dialog>
     <!--  <el-dialog title="生成二维码" :visible.sync="dialogQRCodeFormVisible" width="30%">
@@ -138,8 +150,12 @@
       <el-row class="app-query">
         <!--<el-input v-model="listQuery.deviceType" placeholder="设备类型名称"  style="width: 150px;"></el-input>-->
         <!--<el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>-->
-        <el-button style="margin-left: 10px;" @click="handleDeviceTypeCreate" type="primary" icon="el-icon-edit">新增</el-button>
-        <el-button style="margin-left: 80%;" @click="handleCenal" type="primary" >取消</el-button>
+        <el-col :span="22">
+        <el-button  @click="handleDeviceTypeCreate" type="success" icon="el-icon-plus">新增</el-button>
+        </el-col>
+        <el-col :span="2">
+        <el-button  @click="handleCenal" icon="el-icon-back" type="warning" >取消</el-button>
+        </el-col>
       </el-row>
 
       <el-table :data="deviceTypeList" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
@@ -173,8 +189,8 @@
             </el-form-item>-->
           </el-form>
           <div slot="footer" class="dialog-footer">
-            <el-button @click="dilogdeviceTypeVisible = false">取消</el-button>
             <el-button type="primary" @click="editDeviceTypeData">确认</el-button>
+            <el-button icon="el-icon-back" type="warning" @click="dilogdeviceTypeVisible = false">取消</el-button>
           </div>
         </el-dialog>
       </div>
@@ -403,7 +419,7 @@
       },
       getList() {
         this.listLoading = true
-        getDeviceListByEnterpriseIdAndPage(this.listQuery).then(response => {
+        getDeviceListByEnterpriseIdAndPage(this.listQuery.enterpriseId).then(response => {
           const data=response.data.data
           this.list=data;
           this.listLoading = false
@@ -414,6 +430,7 @@
         getDeviceListBySuffix(this.suffix).then(response => {
           const data=response.data.data
           this.deviceNoList=data;
+          this.list=[];
           this.list.push(this.deviceNoList)
           this.listLoading = false
         })
@@ -561,11 +578,16 @@
 
               }
               insertDevice(deviceList).then(data=>{
-                this.dialogFormVisible = false
-                this.$message({
-                  message: "成功",
-                  type: 'success'
-                });
+                console.log(data.data.code)
+                if(data.data.code==0){
+                  this.dialogFormVisible = false
+                  this.$message({
+                    message: "成功",
+                    type: 'success'
+                  });
+                }else {
+                  this.$message.error(data.data.msg)
+                }
               })
             }else{
               this.DeviceList1.prefix=this.deviceFormData.devicePrefix,

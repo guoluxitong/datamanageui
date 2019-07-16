@@ -28,7 +28,14 @@
           <el-input type="password" v-model="passWordChangeFormData.checkNewPassWord" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm">提交</el-button>
+          <el-row>
+            <el-col :offset="10" :span="8">
+            <el-button type="primary" @click="submitForm">确认</el-button>
+            </el-col>
+            <el-col :span="4">
+            <el-button icon="el-icon-back" type="warning" @click="dialogFormVisible = false">取消</el-button>
+            </el-col>
+          </el-row>
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -39,14 +46,21 @@
   import { mapGetters } from 'vuex'
   import Hamburger from '@/components/Hamburger'
   import {editEmployeePass} from '@/api/employee'
+  import ElRow from "element-ui/packages/row/src/row";
   export default {
     components: {
+      ElRow,
       Hamburger
     },
     data(){
       let validateOldPassWord = (rule, value, callback) => {
         if (value === '') {
           callback(new Error('请输入原始密码'));
+        }else {
+          if (value != this.$store.state.user.password) {
+            callback(new Error("原始密码输入不正确"));
+          }
+          callback();
         }
       }
       let validateNewPassWord = (rule, value, callback) => {
@@ -104,9 +118,10 @@
         })
       },
       submitForm() {
+        console.log(this.$store.state.user.password)
         this.$refs['passWordChangeForm'].validate((valid) => {
           if (valid) {
-            editEmployeePass({id:this.$store.state.user.token,password:this.passWordChangeFormData.newPassWord}).then(()=>{
+            editEmployeePass({password:this.passWordChangeFormData.newPassWord}).then(()=>{
               this.dialogFormVisible = false
               this.$message( {
                 message: '修改成功',

@@ -8,18 +8,19 @@ export function getDeviceList(query) {
   })
 }
 
-export function getDeviceListByEnterpriseIdAndPage(query) {
+export function getDeviceListByEnterpriseIdAndPage(enterpriseId) {
+  console.log(enterpriseId)
   return request({
-    url: '/webapi/datacenter/device/find/enterprise',
+    url: '/webapi/datacenter/device/list/enterprise',
     method: 'get',
-    params: query
+    params: {enterpriseId:enterpriseId }
   })
 }
 export function getDeviceListBySuffix(query) {
   return request({
-    url: '/webapi/datacenter/device/get/deviceno',
+    url: '/webapi/datacenter/device/fix/suffix',
     method: 'get',
-    params:{deviceNo:query}
+    params:{suffix:query}
   })
 }
 export function insertDevice(data) {

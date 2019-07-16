@@ -44,7 +44,6 @@
         this.$refs.loginForm.validate(valid => {
           if (valid) {
             this.loading = true
-            console.log('----------')
             this.$store.dispatch('login', this.loginForm).then(() => {
               this.loading = false
               this.$router.push({ path: this.redirect || '/home/index' })
@@ -53,7 +52,6 @@
 
               this.$message.error(msg);
               this.loading = false
-               console.log('xxxxxxxxxxxxxxxxxxxxxxxxx')
             })
           } else {
             return false

@@ -16,7 +16,14 @@ export function getEmployeeInfoByMobile(loginId) {
 }
 export function editEmployee(data) {
   return request({
-    url: '/webapi/datacenter/employee/change/password',
+    url: '/webapi/user/change/password',
+    method: 'post',
+    data:qs.stringify(data)
+  })
+}
+export function editEmployeePass(data) {
+  return request({
+    url: '/webapi/datacenter/employee/change/user/password',
     method: 'post',
     data:qs.stringify(data)
   })
@@ -25,7 +32,7 @@ export function createEmployee(data) {
   return request({
     url: '/webapi/datacenter/employee/create',
     method: 'post',
-    data:qs.stringify(data)
+    data:(data)
   })
 }
 export function editEmployeeRole(data) {
@@ -43,10 +50,4 @@ export function deleteEmployeeById(id) {
     params:{id}
   })
 }
-export function editEmployeePass(data) {
-  return request({
-    url: '/webapi/datacenter/employee',
-    method: 'post',
-    data:data
-  })
-}
+

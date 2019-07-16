@@ -1,10 +1,12 @@
 <template>
   <div class="app-container">
-    <!--<el-row class="app-query">-->
+    <el-row class="app-query">
       <!--<el-input v-model="listQuery.customerName" placeholder="客户名称"  style="width: 150px;"></el-input>-->
       <!--<el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>-->
-      <el-button style="margin-left: 10px;" @click="handleCreate" type="primary" icon="el-icon-edit">新增</el-button>
-    <!--</el-row>-->
+    <el-col :span="2">
+      <el-button style="margin-left: 10px;" @click="handleCreate" type="success" icon="el-icon-plus">新增</el-button>
+    </el-col>
+    </el-row>
 
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
 
@@ -43,8 +45,8 @@
 
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">取消</el-button>
           <el-button type="primary" @click="editData">确认</el-button>
+          <el-button icon="el-icon-back" type="warning" @click="dialogFormVisible = false">取消</el-button>
         </div>
       </el-dialog>
     </div>

@@ -20,8 +20,8 @@ const user = {
     SET_TOKEN: (state, token) => {
       state.token = token
     },
-    PASSWORD: (state, passWord) => {
-      state.password = passWord
+    PASSWORD: (state, password) => {
+      state.password = password
     },
     ORG_TYPE: (state, orgType) => {
       state.orgType = orgType
@@ -55,7 +55,7 @@ const user = {
       return new Promise((resolve, reject) => {
         login(employeeInfo.account.trim(), employeeInfo.password,employeeInfo.orgType).then(response => {
           const data = response.data
-          if(data.code!=0){
+          if(data.code==0){
             commit('SET_TOKEN', data.data)
             setToken(data.data)
             resolve()
