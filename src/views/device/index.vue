@@ -27,17 +27,17 @@
       </el-col>
     </el-row>
 
-    <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
+    <el-table :data="list.slice((currentPage1-1)*pageSize1,currentPage1*pageSize1)" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
       <el-table-column align="left" :show-overflow-tooltip="true" label="设备编号">
         <template slot-scope="scope">
           <span>{{scope.row.deviceSuffix}}</span>
         </template>
       </el-table-column>
-      <el-table-column align="left" :show-overflow-tooltip="true"  label="企业名称">
+     <!-- <el-table-column v-if="enterpriseList.enterpriseName!=''" align="left" :show-overflow-tooltip="true"  label="企业名称">
         <template slot-scope="scope">
           <span>{{enterpriseList.enterpriseName}}</span>
         </template>
-      </el-table-column>
+      </el-table-column>-->
       <el-table-column align="left" :show-overflow-tooltip="true" label="设备类型">
         <template slot-scope="scope">
           <span>{{scope.row.deviceType}}</span>
@@ -45,7 +45,7 @@
       </el-table-column>
       <el-table-column align="left" :show-overflow-tooltip="true"  label="导入时间">
         <template slot-scope="scope">
-          <span>{{scope.row.importDatetime}}</span>
+          <span>{{dateFormat(scope.row.importDatetime)}}</span>
         </template>
       </el-table-column>
     </el-table>
@@ -53,10 +53,17 @@
       <menu-context-item @click="handleUpdate">编辑</menu-context-item>
       <!--<menu-context-item @click="handleDelete">删除</menu-context-item>-->
     </menu-context>
-    <!--<div class="pagination-container">
-      <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
-      </el-pagination>
-    </div>-->
+    <div class="pagination-container">
+      <el-pagination
+        background
+        @size-change="handleSizeChange1"
+        @current-change="handleCurrentChange1"
+        :current-page="currentPage1"
+        :page-sizes="[5]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="list.length"
+      ></el-pagination>
+    </div>
     <div class="el-dialog-device">
       <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="40%">
         <el-form ref="DeviceFormData" :model="deviceFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
@@ -158,7 +165,7 @@
         </el-col>
       </el-row>
 
-      <el-table :data="deviceTypeList" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
+      <el-table :data="deviceTypeList.slice((currentPage1-1)*pageSize1,currentPage1*pageSize1)" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
         <el-table-column :show-overflow-tooltip="true" align="left" label="设备类型名称">
           <template slot-scope="scope">
             <span>{{scope.row.deviceType}}</span>
@@ -169,10 +176,17 @@
         <menu-context-item @click="handleDeviceTypeUpdate">编辑</menu-context-item>
         <!--<menu-context-item @click="handleDelete">删除</menu-context-item>-->
       </menu-context>
-      <!-- <div class="pagination-container">
-         <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
-         </el-pagination>
-       </div>-->
+      <div class="pagination-container">
+        <el-pagination
+          background
+          @size-change="handleSizeChange1"
+          @current-change="handleCurrentChange1"
+          :current-page="currentPage1"
+          :page-sizes="[5]"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="deviceTypeList.length"
+        ></el-pagination>
+      </div>
       <div class="el-dialog-enterprise">
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dilogdeviceTypeVisible" width="30%">
           <el-form :rules="qRCodeRules" ref="deviceTypeForm" :model="deviceTypeFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
@@ -218,6 +232,9 @@
             suffix:'',
             saleStatus:'',
           },
+        currentPage1: 1,
+        pageNum1: 1,
+        pageSize1: 5,
         deviceList:[],
         deviceAddList:
           {
@@ -325,6 +342,38 @@
      /* this. getDeviceList()*/
     },
     methods: {
+      dateFormat: function(time) {
+        var date = new Date(time);
+        var year = date.getFullYear();
+        /* 在日期格式中，月份是从0开始的，因此要加0
+         * 使用三元表达式在小于10的前面加0，以达到格式统一  如 09:11:05
+         * */
+        var month =
+          date.getMonth() + 1 < 10
+            ? "0" + (date.getMonth() + 1)
+            : date.getMonth() + 1;
+        var day = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+        var hours =
+          date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
+        var minutes =
+          date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+        var seconds =
+          date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+        // 拼接
+        return (
+          year +
+          "-" +
+          month +
+          "-" +
+          day +
+          " " +
+          hours +
+          ":" +
+          minutes +
+          ":" +
+          seconds
+        );
+      },
       querySearchAsyncuser(queryString, callback) {
         getEnterpriseListByConditionAndPage().then(response => {
           this.enterpriseList = [];
@@ -404,7 +453,7 @@
         this.$refs.menuContext.openTableMenu(row,event);
       },
       handleFilter() {
-        this.listQuery.pageNum = 1;
+        this.currentPage1=1
         this.getList()
       },
       getDeviceTypeList() {
@@ -436,11 +485,11 @@
         })
       },
       handleCustomerFilter() {
-        this.listQuery.pageNum = 1;
+        this.currentPage1=1
         this.getCustomerList()
       },
       handleSuffixFilter(){
-        this.listQuery.pageNum = 1;
+        this.currentPage1=1
         this.getListBySuffix()
       },
       getDeviceList() {
@@ -488,24 +537,34 @@
               createdeviceType({
                 typeName:this.deviceTypeFormData.deviceType
               }).then(data=>{
-                this.dilogdeviceTypeVisible = false
-                this.$message({
-                  message: '成功',
-                  type: 'success'
-                });
-                this.getDeviceTypeList();
+                if(data.data.code==0){
+                  this.dilogdeviceTypeVisible = false
+                  this.$message({
+                    message: '成功',
+                    type: 'success'
+                  });
+                  this.getDeviceTypeList();
+                }else{
+                  this.$message.error(data.data.msg)
+                  return
+                }
               })
             }else{
               editdeviceType({
                 typeName:this.deviceTypeFormData.deviceType,
                 id:this.deviceTypeFormData.id
               }).then(data=>{
-                this.dilogdeviceTypeVisible = false
-                this.$message({
-                  message: '成功',
-                  type: 'success'
-                });
-                this.getDeviceTypeList();
+                if(data.data.code==0){
+                  this.dilogdeviceTypeVisible = false
+                  this.$message({
+                    message: '成功',
+                    type: 'success'
+                  });
+                  this.getDeviceTypeList();
+                }else {
+                  this.$message.error(data.data.msg)
+                  return
+                }
               })
             }
 
@@ -524,9 +583,11 @@
       },
       handleDeviceType(){
         this.deviceTypeVisible=true;
+        this.currentPage1=1
         this.getDeviceTypeList();
       },
       handleCenal(){
+        this.currentPage1=1
         this.deviceTypeVisible=false;
       },
       handleGenerateQRCode(){
@@ -578,7 +639,6 @@
 
               }
               insertDevice(deviceList).then(data=>{
-                console.log(data.data.code)
                 if(data.data.code==0){
                   this.dialogFormVisible = false
                   this.$message({
@@ -595,15 +655,20 @@
                 this.DeviceList1.suffix=this.deviceFormData.deviceSuffix,
                 this.DeviceList1.saleStatus=this.deviceFormData.status,
               editDevice(this.DeviceList1).then(data=>{
-                this.dialogFormVisible = false
-                this.$message({
-                  message: "成功",
-                  type: 'success'
-                });
-                if(this.suffix==''){
-                  this.getList()
-                }else{
-                  this. getListBySuffix();
+                if(data.data.code==0){
+                  this.dialogFormVisible = false
+                  this.$message({
+                    message: "成功",
+                    type: 'success'
+                  });
+                  if(this.suffix==''){
+                    this.getList()
+                  }else{
+                    this. getListBySuffix();
+                  }
+                }else {
+                  this.$message.error(data.data.msg)
+                  return
                 }
               })
             }
@@ -632,13 +697,13 @@
           });
         });
       },
-      handleSizeChange(val) {
-        this.listQuery.pageSize = val
-        this.getList()
+      handleSizeChange1: function(pageSize) {
+        this.pageSize1 = pageSize;
+        this.handleCurrentChange1(this.currentPage);
       },
-      handleCurrentChange(val) {
-        this.listQuery.pageNum = val
-        this.getList()
+      handleCurrentChange1: function(currentPage) {
+        //页码切换
+        this.currentPage1 = currentPage;
       }
     }
   }

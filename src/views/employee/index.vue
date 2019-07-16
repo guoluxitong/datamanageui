@@ -13,7 +13,7 @@
       </el-col>
     </el-row>
 
-    <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
+    <el-table :data="list.slice((currentPage1-1)*pageSize1,currentPage1*pageSize1)" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
       <el-table-column align="left" :show-overflow-tooltip="true" label="真实姓名">
         <template slot-scope="scope">
           <span>{{scope.row.realName}}</span>
@@ -49,10 +49,17 @@
       <menu-context-item @click="handleUpdate">编辑</menu-context-item>
       <!--<menu-context-item @click="handleEditRole">角色管理</menu-context-item>-->
     </menu-context>
-   <!-- <div class="pagination-container">
-      <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
-      </el-pagination>
-    </div>-->
+    <div class="pagination-container">
+      <el-pagination
+        background
+        @size-change="handleSizeChange1"
+        @current-change="handleCurrentChange1"
+        :current-page="currentPage1"
+        :page-sizes="[5]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="list.length"
+      ></el-pagination>
+    </div>
     <div class="el-dialog-employee">
       <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="40%">
         <el-form :rules="rules" ref="employeeFormData" :model="employeeFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
@@ -220,6 +227,9 @@
           realName:null,
           mobile:null,
         },
+        currentPage1: 1,
+        pageNum1: 1,
+        pageSize1: 5,
         employeeList:{},
         organizationType: [
           {label:"系统管理员",value:0},
@@ -387,24 +397,36 @@
           if (valid) {
             if(this.dialogStatus =='create'){
               createEmployee(this.employeeFormData).then(data=>{
-                this.dialogFormVisible = false
-                this.$message({
-                  message: data.data.msg,
-                  type: 'success'
-                });
-                this.getList()
+                if(data.data.code==0){
+                  this.dialogFormVisible = false
+                  this.$message({
+                    message: data.data.msg,
+                    type: 'success'
+                  });
+                  this.listQuery.mobile=this.employeeFormData.mobile
+                  this.getListByMobile()
+                }else{
+                  this.$message.error(data.data.msg)
+                  return
+                }
               })
             }else{
               editEmployeePass({
                 loginId:this.employeeFormData.mobile,
                 password:this.employeeFormData.password
               }).then(data=>{
-                this.dialogFormVisible = false
-                this.$message({
-                  message: data.data.msg,
-                  type: 'success'
-                });
-                this.getList()
+                if(data.data.code==0){
+                  this.dialogFormVisible = false
+                  this.$message({
+                    message: data.data.msg,
+                    type: 'success'
+                  });
+                  this.listQuery.mobile=this.employeeFormData.mobile
+                  this.getListByMobile()
+                }else{
+                  this.$message.error(data.data.msg)
+                  return;
+                }
               })
             }
           } else {
@@ -451,13 +473,13 @@
           this.getList()
         })
       },
-      handleSizeChange(val) {
-        this.listQuery.pageSize = val
-        this.getList()
+      handleSizeChange1: function(pageSize) {
+        this.pageSize1 = pageSize;
+        this.handleCurrentChange1(this.currentPage);
       },
-      handleCurrentChange(val) {
-        this.listQuery.pageNum = val
-        this.getList()
+      handleCurrentChange1: function(currentPage) {
+        //页码切换
+        this.currentPage1 = currentPage;
       }
     }
   }

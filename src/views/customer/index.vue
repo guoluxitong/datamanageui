@@ -8,7 +8,7 @@
     </el-col>
     </el-row>
 
-    <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
+    <el-table :data="list.slice((currentPage1-1)*pageSize1,currentPage1*pageSize1)" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
 
       <el-table-column :show-overflow-tooltip="true" align="left" label="锅炉厂名称">
         <template slot-scope="scope">
@@ -26,10 +26,17 @@
       <menu-context-item @click="handleUpdate">编辑</menu-context-item>
       <!--<menu-context-item @click="handleDelete">删除</menu-context-item>-->
     </menu-context>
-   <!-- <div class="pagination-container">
-      <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
-      </el-pagination>
-    </div>-->
+    <div class="pagination-container">
+      <el-pagination
+        background
+        @size-change="handleSizeChange1"
+        @current-change="handleCurrentChange1"
+        :current-page="currentPage1"
+        :page-sizes="[5]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="list.length"
+      ></el-pagination>
+    </div>
     <div class="el-dialog-customer">
       <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="30%">
         <el-form :rules="rules" ref="customerForm" :model="customerFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
@@ -65,13 +72,16 @@
                 }
             }
             return {
-                list: null,
+                list: [],
               listQuery: {
                 total:50,
                 pageNum:1,
                 pageSize:5,
                 customerName:""
               },
+              currentPage1: 1,
+              pageNum1: 1,
+              pageSize1: 5,
                 statusArray:[
                     {value:0,label:'否'},
                     {value:1,label:'是'}
@@ -116,12 +126,16 @@
             getList() {
                 this.listLoading = true
                 getCustomerListByConditionAndPage().then(response => {
+                         if(response.data.code==0){
+                           const data=response.data.data
 
-                    const data=response.data.data
+                           this.list=data
 
-                    this.list=data
-
-                    this.listLoading = false
+                           this.listLoading = false
+                         }else{
+                           this.$message.error(response.data.msg)
+                           return
+                         }
                 })
             },
             resetTemp() {
@@ -155,12 +169,17 @@
                           customerName:this.customerFormData.customerName,
                           status:this.customerFormData.status,
                         }).then(data=>{
-                          this.dialogFormVisible = false
-                          this.$message({
-                            message: '成功',
-                            type: 'success'
-                          });
-                          this.getList()
+                          if(data.data.code==0){
+                            this.dialogFormVisible = false
+                            this.$message({
+                              message: '成功',
+                              type: 'success'
+                            });
+                            this.getList()
+                          }else{
+                            this.$message.error(data.data.msg)
+                            return
+                          }
                         })
                       }else{
                         editCustomer({
@@ -168,12 +187,17 @@
                           customerName:this.customerFormData.customerName,
                           status:this.customerFormData.status,
                         }).then(data=>{
-                          this.dialogFormVisible = false
-                          this.$message({
-                            message: '成功',
-                            type: 'success'
-                          });
-                          this.getList()
+                          if(data.data.code==0){
+                            this.dialogFormVisible = false
+                            this.$message({
+                              message: '成功',
+                              type: 'success'
+                            });
+                            this.getList()
+                          }else{
+                            this.$message.error(data.data.msg)
+                            return
+                          }
                         })
                       }
                     } else {
@@ -201,14 +225,14 @@
                     });
                 });
             },
-            handleSizeChange(val) {
-                this.listQuery.pageSize = val
-                this.getList()
-            },
-            handleCurrentChange(val) {
-                this.listQuery.pageNum = val
-                this.getList()
-            }
+          handleSizeChange1: function(pageSize) {
+            this.pageSize1 = pageSize;
+            this.handleCurrentChange1(this.currentPage);
+          },
+          handleCurrentChange1: function(currentPage) {
+            //页码切换
+            this.currentPage1 = currentPage;
+          }
         }
     }
 </script>

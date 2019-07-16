@@ -12,7 +12,7 @@
       </el-col>
     </el-row>
 
-    <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
+    <el-table :data="list.slice((currentPage1-1)*pageSize1,currentPage1*pageSize1)" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
       <el-table-column :show-overflow-tooltip="true" align="left" label="企业名称">
         <template slot-scope="scope">
           <span>{{scope.row.enterpriseName}}</span>
@@ -33,10 +33,17 @@
       <menu-context-item @click="handleUpdate">编辑</menu-context-item>
       <!--<menu-context-item @click="handleDelete">删除</menu-context-item>-->
     </menu-context>
-   <!-- <div class="pagination-container">
-      <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
-      </el-pagination>
-    </div>-->
+    <div class="pagination-container">
+      <el-pagination
+        background
+        @size-change="handleSizeChange1"
+        @current-change="handleCurrentChange1"
+        :current-page="currentPage1"
+        :page-sizes="[5]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="list.length"
+      ></el-pagination>
+    </div>
     <div class="el-dialog-enterprise">
       <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="30%">
         <el-form :rules="rules" ref="enterpriseForm" :model="enterpriseFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
@@ -65,7 +72,7 @@
       <el-button icon="el-icon-back" type="warning" @click="handleCancel"  >取消</el-button>
         </el-col>
       </el-row>
-      <el-table :data="customerList" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
+      <el-table :data="customerList.slice((currentPage1-1)*pageSize1,currentPage1*pageSize1)" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
 
         <el-table-column :show-overflow-tooltip="true" align="left" label="企业名称">
           <template slot-scope="scope">
@@ -87,10 +94,17 @@
         <menu-context-item @click="handleCustomerUpdate">编辑</menu-context-item>
         <!--<menu-context-item @click="handleDelete">删除</menu-context-item>-->
       </menu-context>
-      <!--<div class="pagination-container">
-        <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
-        </el-pagination>
-      </div>-->
+      <div class="pagination-container">
+        <el-pagination
+          background
+          @size-change="handleSizeChange1"
+          @current-change="handleCurrentChange1"
+          :current-page="currentPage1"
+          :page-sizes="[5]"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="customerList.length"
+        ></el-pagination>
+      </div>
       <div class="el-dialog-customer">
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogCustomerFormVisible" width="30%">
           <el-form :rules="rules" ref="enterprisecustomerForm" :model="enterprisecustomerFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
@@ -124,7 +138,7 @@
       <el-button  @click="handleCodeCancel" icon="el-icon-back" type="warning" >取消</el-button>
         </el-col>
       </el-row>
-      <el-table :data="customerCodeList" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" >
+      <el-table :data="customerCodeList.slice((currentPage1-1)*pageSize1,currentPage1*pageSize1)" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" >
 
         <el-table-column :show-overflow-tooltip="true" align="left" label="客户名称">
           <template slot-scope="scope">
@@ -142,6 +156,17 @@
           </template>
         </el-table-column>
       </el-table>
+      <div class="pagination-container">
+        <el-pagination
+          background
+          @size-change="handleSizeChange1"
+          @current-change="handleCurrentChange1"
+          :current-page="currentPage1"
+          :page-sizes="[5]"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="customerCodeList.length"
+        ></el-pagination>
+      </div>
       <div class="el-dialog-customer">
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogCustomerCodeFormVisible" width="30%">
           <el-form :rules="rules" ref="customerForm" :model="enterprisecustomerCodeFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
@@ -165,7 +190,7 @@
       <el-button icon="el-icon-back" type="warning" @click="handleEnterpriseCancel"  >取消</el-button>
         </el-col>
       </el-row>
-      <el-table :data="enterpriseCodeList" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
+      <el-table :data="enterpriseCodeList.slice((currentPage1-1)*pageSize1,currentPage1*pageSize1)" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row style="width: 120%" @row-contextmenu="openTableMenu">
         <el-table-column :show-overflow-tooltip="true" align="left" label="企业名称">
           <template slot-scope="scope">
             <span>{{scope.row.enterpriseName}}</span>
@@ -186,10 +211,17 @@
       <menu-context ref="menuContext">
         <menu-context-item @click="handleEnterpriseUpdate">编辑</menu-context-item>
       </menu-context>
-      <!--<div class="pagination-container">
-        <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-sizes="[5,10,15,20]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total">
-        </el-pagination>
-      </div>-->
+      <div class="pagination-container">
+        <el-pagination
+          background
+          @size-change="handleSizeChange1"
+          @current-change="handleCurrentChange1"
+          :current-page="currentPage1"
+          :page-sizes="[5]"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="enterpriseCodeList.length"
+        ></el-pagination>
+      </div>
       <div class="el-dialog-customer">
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogCodeFormVisible" width="30%">
           <el-form :rules="rules" ref="enterpriseForm" :model="enterpriseCodeFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
@@ -229,16 +261,19 @@
     export default {
         data() {
             return {
-                list: null,
-              customerList:null,
-              customerCodeList:null,
-              enterpriseCodeList:null,
+                list: [],
+              customerList:[],
+              customerCodeList:[],
+              enterpriseCodeList:[],
               listQuery: {
                     total:50,
                     pageNum:1,
                     pageSize:5,
                     enterpriseName:null
                 },
+              currentPage1: 1,
+              pageNum1: 1,
+              pageSize1: 5,
               enterpriseName: '',
               listQuery1: {
                 total:50,
@@ -354,12 +389,14 @@
             this.enterprisecustomerFormData.enterpriseId=item.id
           },
           customercode(index,row){
+            this.currentPage1=1
             this.enterprisecodevisible=2;
             this.listQuery2.enterpriseCustomerId=row.id;
             this.enterpriseCustomerId=row.id;
             this.getCustomerCodeList()
           },
           customer(index,row){
+            this.currentPage1=1
             this.enterprisecodevisible=1;
             this.listQuery1.enterpriseId=row.id;
             this.enterpriseName=row.enterpriseName;
@@ -367,35 +404,49 @@
             this.getCustomerList()
           },
           enterprise(){
+            this.currentPage1=1
             this.enterprisecodevisible=3;
             this.getEnterpriseList()
           },
           getEnterpriseList() {
             this.listLoading = true;
             enterprisecodelist().then(response => {
-              console.log(response);
+            if(response.data.code==0){
               const data=response.data.data;
               this.enterpriseCodeList=data;
               this.listLoading = false
+            }else {
+              this.$message.error(response.data.msg)
+              return
+            }
             })
           },
           getCustomerList() {
             this.listLoading = true;
             enterprisecustomerlist(this.listQuery1).then(response => {
-              const data=response.data.data;
-              this.customerList=data;
-              this.listLoading = false
+              if(response.data.code==0){
+                const data=response.data.data;
+                this.customerList=data;
+                this.listLoading = false
+              }else{
+                this.$message.error(response.data.msg)
+                return
+              }
             })
           },
           getCustomerCodeList() {
             this.listLoading = true;
             enterprisecustomercodelist(this.listQuery2).then(response => {
+             if(response.data.code==0){
+               const data=response.data.data;
 
-              const data=response.data.data;
+               this.customerCodeList=data;
 
-              this.customerCodeList=data;
-
-              this.listLoading = false
+               this.listLoading = false
+             }else{
+               this.$message.error(response.data.msg)
+               return
+             }
             })
           },
             openTableMenu(row, event) {
@@ -408,9 +459,14 @@
             getList() {
                 this.listLoading = true;
                 getEnterpriseListByConditionAndPage().then(response => {
-                  const data=response.data.data;
-                  this.list=data;
-                  this.listLoading = false
+                  if(response.data.code==0){
+                    const data=response.data.data;
+                    this.list=data;
+                    this.listLoading = false
+                  }else{
+                    this.$message.error(response.data.msg)
+                    return
+                  }
                 })
             },
             resetTemp() {
@@ -421,12 +477,15 @@
                 }
             },
           handleCancel(){
+            this.currentPage1=1
             this.enterprisecodevisible=0;
           },
           handleCodeCancel(){
+            this.currentPage1=1
             this.enterprisecodevisible=1;
           },
           handleEnterpriseCancel(){
+            this.currentPage1=1
             this.enterprisecodevisible=0;
           },
           handleCodeCreate(){
@@ -497,24 +556,34 @@
                     enterpriseId:this.enterpriseCodeFormData.enterpriseId,
                     prefix: this.enterpriseCodeFormData.codePrefix,
                   }).then(data=>{
-                    this.dialogCodeFormVisible = false;
-                    this.$message({
-                      message: '成功',
-                      type: 'success'
-                    });
-                    this.getEnterpriseList()
+                    if(data.data.code==0){
+                      this.dialogCodeFormVisible = false;
+                      this.$message({
+                        message: '成功',
+                        type: 'success'
+                      });
+                      this.getEnterpriseList()
+                    }else {
+                      this.$message.error(data.data.msg)
+                      return
+                    }
                   })
                 }else{
                   editenterprisecode({
                     enterpriseId:this.enterpriseCodeFormData.id,
                     status: this.enterpriseCodeFormData.status,
                   }).then(data=>{
-                    this.dialogCodeFormVisible = false;
-                    this.$message({
-                      message: '成功',
-                      type: 'success'
-                    });
-                    this.getEnterpriseList()
+                    if(data.data.code==0){
+                      this.dialogCodeFormVisible = false;
+                      this.$message({
+                        message: '成功',
+                        type: 'success'
+                      });
+                      this.getEnterpriseList()
+                    }else {
+                      this.$message.error(data.data.msg)
+                      return
+                    }
                   })
                 }
               } else {
@@ -530,12 +599,17 @@
                   enterpriseCustomerId:this.enterprisecustomerCodeFormData.enterpriseCustomerId,
                   code:this.enterprisecustomerCodeFormData.code,
                 }).then(data=>{
-                  this.dialogCustomerCodeFormVisible = false;
-                  this.$message({
-                    message: '成功',
-                    type: 'success'
-                  });
-                  this.getCustomerCodeList()
+                  if(data.data.code==0){
+                    this.dialogCustomerCodeFormVisible = false;
+                    this.$message({
+                      message: '成功',
+                      type: 'success'
+                    });
+                    this.getCustomerCodeList()
+                  }else{
+                    this.$message.error(data.data.msg)
+                    return
+                  }
                 })
               } else {
                 return false
@@ -551,24 +625,34 @@
                     customerName:this.enterprisecustomerFormData.customerName,
                     status:1
                   }).then(data=>{
-                    this.dialogCustomerFormVisible = false;
-                    this.$message({
-                      message: '成功',
-                      type: 'success'
-                    });
-                    this.getCustomerList()
+                    if(data.data.code==0){
+                      this.dialogCustomerFormVisible = false;
+                      this.$message({
+                        message: '成功',
+                        type: 'success'
+                      });
+                      this.getCustomerList()
+                    }else{
+                      this.$message.error(data.data.msg)
+                      return
+                    }
                   })
                 }else{
                   editenterprisecustomer({
                     id:this.enterprisecustomerFormData.id,
                     customerName:this.enterprisecustomerFormData.customerName,
                   }).then(data=>{
-                    this.dialogCustomerFormVisible = false;
-                    this.$message({
-                      message: '成功',
-                      type: 'success'
-                    });
-                    this.getCustomerList()
+                    if(data.data.code==0){
+                      this.dialogCustomerFormVisible = false;
+                      this.$message({
+                        message: '成功',
+                        type: 'success'
+                      });
+                      this.getCustomerList()
+                    }else{
+                      this.$message.error(data.data.msg)
+                      return
+                    }
                   })
                 }
 
@@ -593,12 +677,17 @@
                       enterpriseName:this.enterpriseFormData.enterpriseName,
                       status:this.enterpriseFormData.status
                     }).then(data=>{
-                      this.dialogFormVisible = false;
-                      this.$message({
-                        message: '成功',
-                        type: 'success'
-                      });
-                      this.getList()
+                      if(data.data.code==0){
+                        this.dialogFormVisible = false;
+                        this.$message({
+                          message: '成功',
+                          type: 'success'
+                        });
+                        this.getList()
+                      }else{
+                        this.$message.error(data.data.msg)
+                        return
+                      }
                     })
                   }else{
                     editEnterprise({
@@ -606,12 +695,17 @@
                       enterpriseName:this.enterpriseFormData.enterpriseName,
                       status:this.enterpriseFormData.status
                     }).then(data=>{
-                      this.dialogFormVisible = false;
-                      this.$message({
-                        message: '成功',
-                        type: 'success'
-                      });
-                      this.getList()
+                      if(data.data.code==0){
+                        this.dialogFormVisible = false;
+                        this.$message({
+                          message: '成功',
+                          type: 'success'
+                        });
+                        this.getList()
+                      }else{
+                        this.$message.error(data.data.msg)
+                        return
+                      }
                     })
                   }
 
@@ -640,14 +734,14 @@
                     });
                 });
             },
-            handleSizeChange(val) {
-                this.listQuery.pageSize = val;
-                this.getList()
-            },
-            handleCurrentChange(val) {
-                this.listQuery.pageNum = val;
-                this.getList()
-            }
+          handleSizeChange1: function(pageSize) {
+            this.pageSize1 = pageSize;
+            this.handleCurrentChange1(this.currentPage);
+          },
+          handleCurrentChange1: function(currentPage) {
+            //页码切换
+            this.currentPage1 = currentPage;
+          }
         }
     }
 </script>

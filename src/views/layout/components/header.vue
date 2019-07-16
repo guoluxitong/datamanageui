@@ -33,7 +33,7 @@
             <el-button type="primary" @click="submitForm">确认</el-button>
             </el-col>
             <el-col :span="4">
-            <el-button icon="el-icon-back" type="warning" @click="dialogFormVisible = false">取消</el-button>
+            <el-button icon="el-icon-back" type="warning" @click="cancel ">取消</el-button>
             </el-col>
           </el-row>
         </el-form-item>
@@ -45,7 +45,7 @@
 <script>
   import { mapGetters } from 'vuex'
   import Hamburger from '@/components/Hamburger'
-  import {editEmployeePass} from '@/api/employee'
+  import {editEmployee} from '@/api/employee'
   import ElRow from "element-ui/packages/row/src/row";
   export default {
     components: {
@@ -57,7 +57,7 @@
         if (value === '') {
           callback(new Error('请输入原始密码'));
         }else {
-          if (value != this.$store.state.user.password) {
+          if (value != this.$store.state.user.token.password) {
             callback(new Error("原始密码输入不正确"));
           }
           callback();
@@ -105,42 +105,43 @@
       ])
     },
     methods: {
+      cancel(){
+        this.dialogFormVisible=false
+        this.$nextTick(() => {
+          this.$refs["passWordChangeForm"].resetFields();
+        });
+      },
       toggleSideBar() {
         this.$store.dispatch('toggleSideBar')
       },
       handleUpdatePassWord(){
         this.passWordChangeFormData.oldPassWord=''
         this.passWordChangeFormData.newPassWord=''
-        this.checkNewPassWord=''
+        this.passWordChangeFormData.checkNewPassWord=''
         this.dialogFormVisible = true
-        this.$nextTick(() => {
-          this.$refs['passWordChangeForm'].clearValidate()
-        })
       },
       submitForm() {
-        console.log(this.$store.state.user.password)
-        this.$refs['passWordChangeForm'].validate((valid) => {
-          if (valid) {
-            editEmployeePass({password:this.passWordChangeFormData.newPassWord}).then(()=>{
-              this.dialogFormVisible = false
-              this.$message( {
-                message: '修改成功',
-                type: 'success'
-              });
-              Promise.all([this.$store.dispatch('LogOut'),this.$store.dispatch('removeRouters'),this.$store.dispatch('delAllViews')]).then(()=>{
-                this.$router.push({ path: '/login' })
-              })
+        console.log(this.$store.state.user.token.password)
+            editEmployee({password:this.passWordChangeFormData.newPassWord}).then(data=>{
+
+              if(data.data.code==0){
+                this.dialogFormVisible = false
+                this.$message( {
+                  message: '修改成功',
+                  type: 'success'
+                });
+                Promise.all([this.$store.dispatch('LogOut'),this.$store.dispatch('removeRouters'),this.$store.dispatch('delAllViews')]).then(()=>{
+                  this.$router.push({ path: '/login' })
+                })
+              }else{
+                this.$message.error(data.data.msg)
+              }
             }).catch(()=>{
               this.$message( {
                 message: '修改失败',
                 type: 'error'
               });
             })
-          } else {
-            console.log('error submit!!');
-            return false;
-          }
-        });
       },
       logout() {
         this.$confirm('确认退出?', '提示', {

@@ -18,6 +18,7 @@
 </template>
 
 <script>
+  import { login } from '@/api/login'
   export default {
     data() {
       return {
@@ -40,7 +41,6 @@
     },
     methods: {
       handleLogin() {
-        this.loginForm.orgType=0
         this.$refs.loginForm.validate(valid => {
           if (valid) {
             this.loading = true
