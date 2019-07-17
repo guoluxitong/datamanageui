@@ -3,7 +3,7 @@
     <el-row class="app-query">
       <!--<el-input v-model="listQuery.realName" placeholder="姓名"  style="width: 150px;"></el-input>-->
       <el-col :span="3">
-      <el-input v-model="listQuery.mobile" placeholder="电话"  style="width: 150px;"></el-input>
+      <el-input v-model="listQuery.mobile" placeholder="电话"  style="width: 140px;"></el-input>
       </el-col>
       <el-col :span="2">
       <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>

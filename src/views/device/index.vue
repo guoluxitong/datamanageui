@@ -4,6 +4,7 @@
     <el-row class="app-query">
       <el-col :span="3">
       <el-autocomplete
+        style="width: 140px"
         v-model="enterpriseList.enterpriseName"
         :fetch-suggestions="querySearchAsyncuser"
         placeholder="所属企业"
@@ -14,7 +15,7 @@
       <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>
       </el-col>
       <el-col :span="3">
-      <el-input clearable v-model="suffix" placeholder="设备编号"  style="width: 150px;"></el-input>
+      <el-input  style="width: 140px" clearable v-model="suffix" placeholder="设备编号"  ></el-input>
       </el-col>
       <el-col :span="2">
       <el-button  type="primary" icon="el-icon-search" @click="handleSuffixFilter">查询</el-button>
@@ -154,7 +155,7 @@
     </div>
   </div>
     <div v-if="deviceTypeVisible">
-      <el-row class="app-query">
+      <el-row style="margin-left: 10px;margin-top: 10px" class="app-query">
         <!--<el-input v-model="listQuery.deviceType" placeholder="设备类型名称"  style="width: 150px;"></el-input>-->
         <!--<el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>-->
         <el-col :span="22">
@@ -245,6 +246,7 @@
             deviceNo:''
           },
         addDeviceTypeList:[],
+        deviceTypeOption:[],
         deviceNoList:{},
         enterpriseOption:[],
         customerOption:[],
@@ -339,7 +341,7 @@
       }
     },
     created() {
-     /* this. getDeviceList()*/
+     this.inintselect()
     },
     methods: {
       dateFormat: function(time) {
@@ -374,17 +376,22 @@
           seconds
         );
       },
-      querySearchAsyncuser(queryString, callback) {
+      inintselect(){
         getEnterpriseListByConditionAndPage().then(response => {
-          this.enterpriseList = [];
+          this.enterpriseOption = response.data.data;
+        })
+        getDeviceTypeListByConditionAndPage(this.listQuery2).then(response => {
+          this.deviceTypeOption = response.data.data;
+        })
+      },
+      querySearchAsyncuser(queryString, callback) {
           var results = [];
-          for (let i = 0, len = response.data.data.length; i < len; i++) {
-            response.data.data[i].value = response.data.data[i].enterpriseName;
+          for (let i = 0, len = this.enterpriseOption.length; i < len; i++) {
+            this.enterpriseOption[i].value = this.enterpriseOption[i].enterpriseName;
           }
-          this.enterpriselist = response.data.data;
+          this.enterpriselist=this.enterpriseOption;
           results = queryString ? this.enterpriselist.filter(this.createFilteruser(queryString)) : this.enterpriselist;
           callback(results);
-        });
       },
 
       createFilteruser(queryString, queryArr) {
@@ -396,39 +403,14 @@
         this.listQuery.enterpriseId = item.id;
         this.deviceFormData.enterpriseId=item.id
       },
-      querySearchAsyncuser2(queryString, callback) {
-        getCustomerListByConditionAndPage().then(response => {
-          this.customerList = [];
-          var results = [];
-          for (let i = 0, len = response.data.data.length; i < len; i++) {
-            response.data.data[i].value = response.data.data[i].customerName;
-          }
-          this.customerList = response.data.data;
-          results = queryString ? this.customerList.filter(this.createFilteruser2(queryString)) : this.customerList;
-          callback(results);
-        });
-      },
-
-      createFilteruser2(queryString, queryArr) {
-        return (queryArr) => {
-          return (queryArr.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
-        };
-      },
-      handleSelectuser2(item) {
-        this.listQuery.customerId = item.id;
-
-      },
       querySearchAsyncuser3(queryString, callback) {
-        getDeviceTypeListByConditionAndPage(this.listQuery2).then(response => {
-          this.addDeviceTypeList = [];
           var results = [];
-          for (let i = 0, len = response.data.data.length; i < len; i++) {
-            response.data.data[i].value = response.data.data[i].deviceType;
+          for (let i = 0, len =this.deviceTypeOption.length; i < len; i++) {
+            this.deviceTypeOption[i].value = this.deviceTypeOption[i].deviceType;
           }
-          this.addDeviceTypeList = response.data.data;
+          this.addDeviceTypeList = this.deviceTypeOption;
           results = queryString ? this.addDeviceTypeList.filter(this.createFilteruser3(queryString)) : this.addDeviceTypeList;
           callback(results);
-        });
       },
 
       createFilteruser3(queryString, queryArr) {
@@ -645,6 +627,7 @@
                     message: "成功",
                     type: 'success'
                   });
+                  this. getDeviceList()
                 }else {
                   this.$message.error(data.data.msg)
                 }

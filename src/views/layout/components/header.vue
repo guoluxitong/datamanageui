@@ -121,9 +121,9 @@
         this.dialogFormVisible = true
       },
       submitForm() {
-        console.log(this.$store.state.user.token.password)
+        this.$refs.passWordChangeForm.validate(valid => {
+          if (valid) {
             editEmployee({password:this.passWordChangeFormData.newPassWord}).then(data=>{
-
               if(data.data.code==0){
                 this.dialogFormVisible = false
                 this.$message( {
@@ -142,6 +142,10 @@
                 type: 'error'
               });
             })
+          } else {
+            return false
+          }
+        })
       },
       logout() {
         this.$confirm('确认退出?', '提示', {

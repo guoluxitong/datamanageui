@@ -5,7 +5,7 @@
       <!--<el-input v-model="listQuery.enterpriseName" placeholder="企业名称"  style="width: 150px;"></el-input>-->
       <!--<el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>-->
       <el-col :span="2">
-      <el-button style="margin-left: 10px;" @click="handleCreate" type="success" icon="el-icon-plus">新增</el-button>
+      <el-button  @click="handleCreate" type="success" icon="el-icon-plus">新增</el-button>
       </el-col>
       <el-col :span="2">
       <el-button  type="primary" @click="enterprise">企业编号管理</el-button>
@@ -64,7 +64,7 @@
     </div>
   </div>
     <div v-if="enterprisecodevisible===1">
-      <el-row>
+      <el-row style="margin-left: 10px;margin-top: 10px" class="app-query">
         <el-col :span="22">
       <el-button  @click="handleCustomerCreate" type="success" icon="el-icon-plus">新增</el-button>
         </el-col>
@@ -108,15 +108,6 @@
       <div class="el-dialog-customer">
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogCustomerFormVisible" width="30%">
           <el-form :rules="rules" ref="enterprisecustomerForm" :model="enterprisecustomerFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
-
-            <el-form-item v-if="dialogStatus=='create'" label="企业" prop="enterpriseId">
-              <el-autocomplete
-                v-model="enterpriseName"
-                :fetch-suggestions="querySearchAsyncuser"
-                placeholder="企业"
-                @select="((item)=>{handleSelectuser(item)})"
-              ></el-autocomplete>
-            </el-form-item>
             <el-form-item label="客户名称" prop="customerName">
               <el-input v-model="enterprisecustomerFormData.customerName"></el-input>
             </el-form-item>
@@ -130,9 +121,9 @@
       </div>
     </div>
     <div v-if="enterprisecodevisible===2">
-      <el-row>
+      <el-row style="margin-left: 10px;margin-top: 10px" class="app-query">
         <el-col :span="22">
-      <el-button  @click="handleCodeCreate" type="primary" icon="el-icon-edit">新增</el-button>
+      <el-button  @click="handleCodeCreate" type="success" icon="el-icon-plus">新增</el-button>
         </el-col>
         <el-col :span="2">
       <el-button  @click="handleCodeCancel" icon="el-icon-back" type="warning" >取消</el-button>
@@ -182,7 +173,7 @@
       </div>
     </div >
     <div  v-if="enterprisecodevisible===3">
-      <el-row>
+      <el-row style="margin-left: 10px;margin-top: 10px" class="app-query">
         <el-col :span="22">
       <el-button @click="handleEnterpriseCreate" type="success" icon="el-icon-plus">新增</el-button>
         </el-col>
@@ -225,7 +216,7 @@
       <div class="el-dialog-customer">
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogCodeFormVisible" width="30%">
           <el-form :rules="rules" ref="enterpriseForm" :model="enterpriseCodeFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
-            <el-form-item v-if="dialogStatus =='create'" label="企业" prop="enterpriseId">
+            <el-form-item v-if="dialogStatus =='create'" label="企业" prop="enterpriseName">
               <el-autocomplete
                 v-model="enterpriseName"
                 :fetch-suggestions="querySearchAsyncuser"
@@ -245,7 +236,7 @@
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button type="primary" @click="editEnterpriseData">确认</el-button>
-            <el-button icon="el-icon-back" type="warning" @click="dialogCodeFormVisible = false">取消</el-button>
+            <el-button icon="el-icon-back" type="warning" @click="cancel">取消</el-button>
           </div>
         </el-dialog>
       </div>
@@ -337,6 +328,7 @@
                 code:"",
                 codePrefix:'',
               },
+              enterpriseOption:[],
               enterpriseList:[],
               enterprisecodevisible:0,
                 rules: {
@@ -346,9 +338,7 @@
                   customerName: [
                     { required: true, message: '客户名称不能为空', trigger: 'blur' }
                   ],
-                    enterpriseName: [
-                        { required: true, message: '企业名称不能为空', trigger: 'blur' }
-                    ],
+
                   enterpriseCustomerId: [
                     { required: true, message: '企业客户Id不能为空', trigger: 'blur' }
                   ],
@@ -364,19 +354,26 @@
         },
         created() {
             this.getList()
+          this.inintselect()
         },
         methods: {
-          querySearchAsyncuser(queryString, callback) {
+          cancel(){
+            this.dialogCodeFormVisible = false
+            this.enterpriseName=''
+          },
+          inintselect(){
             getEnterpriseListByConditionAndPage().then(response => {
-              this.enterpriseList = [];
+              this.enterpriseOption = response.data.data;
+            })
+          },
+          querySearchAsyncuser(queryString, callback) {
               var results = [];
-              for (let i = 0, len = response.data.data.length; i < len; i++) {
-                response.data.data[i].value = response.data.data[i].enterpriseName;
+              for (let i = 0, len = this.enterpriseOption.length; i < len; i++) {
+                this.enterpriseOption[i].value = this.enterpriseOption[i].enterpriseName;
               }
-              this.enterpriselist = response.data.data;
+              this.enterpriselist = this.enterpriseOption;
               results = queryString ? this.enterpriselist.filter(this.createFilteruser(queryString)) : this.enterpriselist;
               callback(results);
-            });
           },
 
           createFilteruser(queryString, queryArr) {
@@ -486,6 +483,7 @@
           },
           handleEnterpriseCancel(){
             this.currentPage1=1
+            this.enterpriseName=''
             this.enterprisecodevisible=0;
           },
           handleCodeCreate(){
@@ -621,7 +619,7 @@
               if (valid) {
                 if(this.dialogStatus =='create'){
                   createcustomer({
-                    enterpriseId:this.enterprisecustomerFormData.enterpriseId,
+                    enterpriseId:this.listQuery1.enterpriseId,
                     customerName:this.enterprisecustomerFormData.customerName,
                     status:1
                   }).then(data=>{

@@ -4,7 +4,7 @@
       <!--<el-input v-model="listQuery.endUserName" placeholder="终端用户名称"  style="width: 150px;"></el-input>-->
       <!--<el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>-->
       <el-col :span="2">
-      <el-button style="margin-left: 10px;" @click="handleCreate" type="success" icon="el-icon-plus">新增</el-button>
+      <el-button  @click="handleCreate" type="success" icon="el-icon-plus">新增</el-button>
       </el-col>
     </el-row>
 

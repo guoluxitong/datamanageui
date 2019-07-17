@@ -15,6 +15,7 @@ export function editenterprisecustomer(data) {
     })
 }
 export function createcustomer(data) {
+  console.log(data)
   return request({
     url: '/webapi/datacenter/enterprise/customer/create',
     method: 'post',
