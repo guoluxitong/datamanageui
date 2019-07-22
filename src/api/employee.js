@@ -2,14 +2,14 @@ import request from '@/utils/request'
 import qs from 'qs'
 export function getEmployeeListByConditionAndPage(query) {
   return request({
-    url: '/webapi/datacenter/employee/list',
+    url: '/webapi/datacenter/core/employee/list',
     method: 'get',
     params: query
   })
 }
 export function getEmployeeInfoByMobile(loginId) {
   return request({
-    url: '/webapi/datacenter/employee/find',
+    url: '/webapi/datacenter/core/employee/find',
     method: 'get',
     params:{loginId}
   })
@@ -23,21 +23,21 @@ export function editEmployee(data) {
 }
 export function editEmployeePass(data) {
   return request({
-    url: '/webapi/datacenter/employee/change/user/password',
+    url: '/webapi/datacenter/core/employee/change/user/password',
     method: 'post',
     data:qs.stringify(data)
   })
 }
 export function createEmployee(data) {
   return request({
-    url: '/webapi/datacenter/employee/create',
+    url: '/webapi/datacenter/core/employee/create',
     method: 'post',
     data:(data)
   })
 }
 export function editEmployeeRole(data) {
   return request({
-    url: '/webapi/datacenter/employee',
+    url: '/webapi/datacenter/core/employee',
     method: 'post',
     data:data
   })
@@ -45,7 +45,7 @@ export function editEmployeeRole(data) {
 
 export function deleteEmployeeById(id) {
   return request({
-    url: '/webapi/datacenter/employee',
+    url: '/webapi/datacenter/core/employee',
     method: 'post',
     params:{id}
   })

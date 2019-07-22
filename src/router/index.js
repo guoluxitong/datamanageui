@@ -23,86 +23,85 @@ export const constantRouterMap = [
     ]
   },
   {
-    path:'/enterprise',
+    path:'/',
     component: Layout,
+    name: '核心数据管理',
+    meta: { title: '核心数据管理'},
     children: [
-      {
-        path: 'enterprise',
-        component: () => import('../views/enterprise/index'),
-        name: '企业管理',
-        meta: { title: '企业管理', noCache: true}
+          {
+            path: '/enterprise',
+            component: () => import('../views/enterprise/index'),
+            name: '企业管理',
+            meta: { title: '企业管理', noCache: true}
+
+      },
+          {
+            path: '/customer',
+            component: () => import('../views/customer/index'),
+            name: '锅炉厂管理',
+            meta: { title: '锅炉厂管理', noCache: true}
+      },
+          {
+            path: '/agent',
+            component: () => import('../views/agent/index'),
+            name: '代理管理',
+            meta: { title: '代理管理', noCache: true}
+      },
+          {
+            path: '/enduser',
+            component: () => import('../views/enduser/index'),
+            name: '终端用户管理',
+            meta: { title: '终端用户管理', noCache: true}
+      },
+          {
+            path: '/device',
+            component: () => import('../views/device/index'),
+            name: '设备管理',
+            meta: { title: '设备管理', noCache: true}
+      },
+          {
+            path: '/employee',
+            component: () => import('../views/employee/index'),
+            name: '用户管理',
+            meta: { title: '用户管理', noCache: true}
+      },
+          {
+            path: '/org',
+            component: () => import('../views/org/index'),
+            name: '组织类型管理',
+            meta: { title: '组织类型管理', noCache: true}
       }
     ]
   },
   {
-    path:'/customer',
+    path: '/customer',
     component: Layout,
+    name: '锅炉厂数据管理',
+    meta: {title: '锅炉厂数据管理',noCache: true},
     children: [
       {
-        path: 'customer',
-        component: () => import('../views/customer/index'),
-        name: '锅炉厂管理',
-        meta: { title: '锅炉厂管理', noCache: true}
-      }
-    ]
-  },
-  {
-    path:'/agent',
-    component: Layout,
-    children: [
+        path: '/customer/resource',
+        component: () => import('../views/resource/index'),
+        name: '功能管理',
+        meta: { title: '功能管理', noCache: true}
+      },
       {
-        path: 'agent',
-        component: () => import('../views/agent/index'),
-        name: '代理管理',
-        meta: { title: '代理管理', noCache: true}
-      }
-    ]
-  },
-  {
-    path:'/enduser',
-    component: Layout,
-    children: [
+        path: '/customer/orgresource',
+        component: () => import('../views/orgresource/index'),
+        name: '锅炉厂与功能管理',
+        meta: { title: '锅炉厂与功能管理', noCache: true}
+      },
       {
-        path: 'enduser',
-        component: () => import('../views/enduser/index'),
-        name: '终端用户管理',
-        meta: { title: '终端用户管理', noCache: true}
-      }
-    ]
-  },
-  {
-    path:'/admin-device',
-    component: Layout,
-    children: [
-      {
-        path: 'device',
-        component: () => import('../views/device/index'),
-        name: '设备管理',
-        meta: { title: '设备管理', noCache: true}
-      }
-    ]
-  },
-  {
-    path:'/home',
-    component: Layout,
-    children: [
-      {
-        path: 'employee',
-        component: () => import('../views/employee/index'),
+        path: '/customer/user',
+        component: () => import('../views/user/index'),
         name: '用户管理',
         meta: { title: '用户管理', noCache: true}
-      }
-    ]
-  },
-  {
-    path:'/org',
-    component: Layout,
-    children: [
+      },
       {
-        path: 'org',
-        component: () => import('../views/org/index'),
-        name: '组织类型管理',
-        meta: { title: '组织类型管理', noCache: true}
+        path: '/customer/category',
+        component: () => import('../views/category/index'),
+        name: '辅机管理',
+        meta: { title: '辅机管理', noCache: true}
       }
     ]
   }

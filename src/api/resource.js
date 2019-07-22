@@ -1,30 +1,41 @@
 import request from '@/utils/request'
-
-export function getResourceListByCondition(query) {
+import qs from 'qs'
+export function getResourceList(query) {
   return request({
-    url: '/resource/resourcelistbycondition',
+    url: '/webapi/datacenter/boiler/resource/list',
     method: 'get',
     params: query
   })
 }
-export function getResourceIdListByRoleId(roleId) {
+export function getResoure(orgId) {
   return request({
-    url: '/resource/resourceidlistbyroleid',
+    url: '/webapi/datacenter/boiler/resource/org',
     method: 'get',
-    params: {roleId}
+    params: {orgId:orgId}
   })
 }
-export function editResource(data) {
+
+export function createResource(data) {
   return request({
-    url: '/resource/editresource',
+    url: '/webapi/datacenter/boiler/resource/create',
     method: 'post',
     data:data
   })
 }
-export function deleteResourceById(id) {
+export function editResource(data) {
   return request({
-    url: '/resource/deleteresourcebyid',
+    url: '/webapi/datacenter/boiler/resource/modify',
     method: 'post',
-    params:{id}
+    data:data
   })
 }
+export function map(data) {
+  console.log(data)
+  return request({
+    url: '/webapi/datacenter/boiler/resource/map',
+    method: 'post',
+    params:{orgId:data.orgId},
+    data:data.orgResources
+  })
+}
+

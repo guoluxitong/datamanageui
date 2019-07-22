@@ -3,7 +3,7 @@ import { Message } from 'element-ui'
 import { getToken } from '@/utils/auth'
 //headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 const service = axios.create({
-  
+
   baseURL: '/api',
   timeout: 5000
 });

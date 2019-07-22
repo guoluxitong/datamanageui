@@ -13,7 +13,7 @@ const user = {
     roleList: [],
     resourceList:[],
     deviceNoList:[],
-    deviceRunInfoNo:''
+    deviceRunInfoNo:'',
   },
 
   mutations: {
@@ -121,4 +121,5 @@ const user = {
     },
   }
 }
+
 export default user
