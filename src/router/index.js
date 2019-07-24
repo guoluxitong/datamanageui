@@ -94,8 +94,8 @@ export const constantRouterMap = [
       {
         path: '/customer/user',
         component: () => import('../views/user/index'),
-        name: '用户管理',
-        meta: { title: '用户管理', noCache: true}
+        name: '锅炉厂用户管理',
+        meta: { title: '锅炉厂用户管理', noCache: true}
       },
       {
         path: '/customer/category',
@@ -103,6 +103,33 @@ export const constantRouterMap = [
         name: '辅机管理',
         meta: { title: '辅机管理', noCache: true}
       }
+    ]
+  },
+  {
+    path: '/wx',
+    component: Layout,
+    name: '微信数据管理',
+    meta: {title: '微信数据管理',noCache: true},
+    children: [
+      {
+        path: '/wx/devicecontrol',
+        component: () => import('../views/deviceControl/index'),
+        name: '微信设备管理',
+        meta: { title: '微信设备管理', noCache: true}
+      },
+      {
+        path: '/wx/devicepermission',
+        component: () => import('../views/devicePermission/index'),
+        name: '微信设备权限管理',
+        meta: { title: '微信设备权限管理', noCache: true}
+      },
+      {
+        path: '/wx/devicesms',
+        component: () => import('../views/deviceSms/index'),
+        name: '微信设备短信管理',
+        meta: { title: '微信设备短信管理', noCache: true}
+      }
+
     ]
   }
 ]
