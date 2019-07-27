@@ -18,7 +18,6 @@
 </template>
 
 <script>
-  import { login } from '@/api/login'
   export default {
     data() {
       return {
@@ -49,7 +48,6 @@
               this.$router.push({ path: this.redirect || '/home/index' })
 
             }).catch((msg) => {
-
               this.$message.error(msg);
               this.loading = false
             })
