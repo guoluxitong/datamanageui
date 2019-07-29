@@ -55,12 +55,12 @@ const user = {
       return new Promise((resolve, reject) => {
         login(employeeInfo.account.trim(), employeeInfo.password,employeeInfo.orgType).then(response => {
           const data = response.data
-          if(data.code==0){
+          if(data.code){
+            reject(data.msg)
+          }else{
             commit('SET_TOKEN', data.data)
             setToken(data.data)
             resolve()
-          }else{
-            reject(data.msg)
           }
         }).catch(error => {
           reject(error)
