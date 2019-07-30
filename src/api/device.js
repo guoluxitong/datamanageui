@@ -22,6 +22,13 @@ export function getDeviceListBySuffix(query) {
     params:{suffix:query}
   })
 }
+export function getDeviceListBycustom(query) {
+  return request({
+    url: '/webapi/datacenter/core/device/list/suffix5',
+    method: 'get',
+    params:{suffix5:query}
+  })
+}
 export function insertDevice(data) {
   return request({
     url: '/webapi/datacenter/core/device/create',

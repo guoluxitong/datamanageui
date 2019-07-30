@@ -1,10 +1,10 @@
 import request from '@/utils/request'
 import qs from 'qs'
-export function enterprisecustomercodelist(query) {
+export function enterprisecustomercodelist(enterpriseCustomerId) {
   return request({
     url: '/webapi/datacenter/core/enterprise/customer/prefix/list',
     method: 'get',
-    params: query
+    params: {enterpriseCustomerId: enterpriseCustomerId}
   })
 }
 

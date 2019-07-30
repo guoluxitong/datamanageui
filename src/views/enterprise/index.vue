@@ -420,7 +420,7 @@
           },
           getCustomerList() {
             this.listLoading = true;
-            enterprisecustomerlist(this.listQuery1).then(response => {
+            enterprisecustomerlist(this.listQuery1.enterpriseId).then(response => {
               if(response.data.code==0){
                 const data=response.data.data;
                 this.customerList=data;
@@ -433,7 +433,7 @@
           },
           getCustomerCodeList() {
             this.listLoading = true;
-            enterprisecustomercodelist(this.listQuery2).then(response => {
+            enterprisecustomercodelist(this.listQuery2.enterpriseCustomerId).then(response => {
              if(response.data.code==0){
                const data=response.data.data;
 

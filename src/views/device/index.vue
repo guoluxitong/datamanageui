@@ -11,6 +11,22 @@
         @select="((item)=>{handleSelectuser(item)})"
       ></el-autocomplete>
       </el-col>
+      <el-col :span="3">
+        <el-autocomplete
+          v-model="customerList.customerName"
+          :fetch-suggestions="querySearchAsyncuser2"
+          placeholder="企业客户"
+          @select="((item)=>{handleSelectuser2(item)})"
+        ></el-autocomplete>
+      </el-col>
+      <el-col :span="3">
+        <el-autocomplete
+          v-model="customerCodeList.code"
+          :fetch-suggestions="querySearchAsyncuser4"
+          placeholder="客户编号"
+          @select="((item)=>{handleSelectuser4(item)})"
+        ></el-autocomplete>
+      </el-col>
       <el-col :span="2">
       <el-button  type="primary" icon="el-icon-search" @click="handleFilter">查询</el-button>
       </el-col>
@@ -34,11 +50,11 @@
           <span>{{scope.row.deviceSuffix}}</span>
         </template>
       </el-table-column>
-     <!-- <el-table-column v-if="enterpriseList.enterpriseName!=''" align="left" :show-overflow-tooltip="true"  label="企业名称">
+     <el-table-column  align="left" :show-overflow-tooltip="true"  label="加密编号">
         <template slot-scope="scope">
-          <span>{{enterpriseList.enterpriseName}}</span>
+          <span>{{scope.row.deviceNo}}</span>
         </template>
-      </el-table-column>-->
+      </el-table-column>
       <el-table-column align="left" :show-overflow-tooltip="true" label="设备类型">
         <template slot-scope="scope">
           <span>{{scope.row.deviceType}}</span>
@@ -51,7 +67,7 @@
       </el-table-column>
     </el-table>
     <menu-context ref="menuContext">
-      <menu-context-item @click="handleUpdate">编辑</menu-context-item>
+     <!-- <menu-context-item @click="handleUpdate">编辑</menu-context-item>-->
       <!--<menu-context-item @click="handleDelete">删除</menu-context-item>-->
     </menu-context>
     <div class="pagination-container">
@@ -66,7 +82,7 @@
       ></el-pagination>
     </div>
     <div class="el-dialog-device">
-      <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="40%">
+      <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="40%" @close="close">
         <el-form ref="DeviceFormData" :model="deviceFormData" label-position="right" label-width="80px" style='width: 90%; margin-left:15px;'>
 
           <el-row v-if="dialogStatus=='create'">
@@ -87,6 +103,28 @@
                   :fetch-suggestions="querySearchAsyncuser"
                   placeholder="企业"
                   @select="((item)=>{handleSelectuser(item)})"
+                ></el-autocomplete>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row v-if="dialogStatus=='create'">
+            <el-col :span="12">
+              <el-form-item label="企业客户" prop="deviceType">
+                <el-autocomplete
+                  v-model="customerList.customerName"
+                  :fetch-suggestions="querySearchAsyncuser2"
+                  placeholder="企业客户"
+                  @select="((item)=>{handleSelectuser2(item)})"
+                ></el-autocomplete>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="客户编号" prop="enterpriseId">
+                <el-autocomplete
+                  v-model="customerCodeList.code"
+                  :fetch-suggestions="querySearchAsyncuser4"
+                  placeholder="客户编号"
+                  @select="((item)=>{handleSelectuser4(item)})"
                 ></el-autocomplete>
               </el-form-item>
             </el-col>
@@ -216,8 +254,10 @@
 <script>
   import {fuelArray,mediumArray} from '@/utils/common'
   import {formatDateTime} from '@/utils/date'
-  import {getDeviceListByEnterpriseIdAndPage,getDeviceList,getDeviceListBySuffix,insertDevice,editDevice,deleteDeviceById} from '@/api/device'
+  import {getDeviceListByEnterpriseIdAndPage,getDeviceList,getDeviceListBySuffix,getDeviceListBycustom,insertDevice,editDevice,deleteDeviceById} from '@/api/device'
   import {getEnterpriseListByConditionAndPage} from '@/api/enterprise'
+  import {enterprisecustomerlist} from '@/api/enterpriseCustomer'
+  import {enterprisecustomercodelist} from '@/api/enterpriseCustomerCode'
   import {getCustomerListByConditionAndPage} from '@/api/customer'
   import {getDeviceTypeListByConditionAndPage,createdeviceType,editdeviceType,deletedeviceTypebyid} from '@/api/device-type'
   export default {
@@ -250,9 +290,13 @@
         deviceNoList:{},
         enterpriseOption:[],
         customerOption:[],
+        customerCodeOption:[],
         enterpriseList:{
           id:'',
           enterpriseName:''
+        },
+        customerCodeList:{
+          code: '',
         },
         customerList:{
           id:'',
@@ -293,7 +337,6 @@
           {value:0,label:''}
         ],*/
         /*✖*/
-        deviceTypeOption:[],
         textMap: {
           update: '编辑',
           create: '新增'
@@ -341,9 +384,16 @@
       }
     },
     created() {
+      this.getDeviceList()
      this.inintselect()
     },
     methods: {
+      close(){
+        this.deviceFormData.deviceType=''
+        this.enterpriseList.enterpriseName='';
+        this.customerList.customerName=''
+        this.customerCodeList.code=''
+      },
       dateFormat: function(time) {
         var date = new Date(time);
         var year = date.getFullYear();
@@ -402,6 +452,55 @@
       handleSelectuser(item) {
         this.listQuery.enterpriseId = item.id;
         this.deviceFormData.enterpriseId=item.id
+        this.getCustomerList()
+      },
+      getCustomerList() {
+        enterprisecustomerlist(this.listQuery.enterpriseId).then(response => {
+            const data=response.data.data;
+            this.customerOption=data;
+        })
+      },
+      querySearchAsyncuser2(queryString, callback) {
+        var results = [];
+        for (let i = 0, len = this.customerOption.length; i < len; i++) {
+          this.customerOption[i].value = this.customerOption[i].customerName;
+        }
+        this.customerList=this.customerOption;
+        results = queryString ? this.customerList.filter(this.createFilteruser2(queryString)) : this.customerList;
+        callback(results);
+      },
+
+      createFilteruser2(queryString, queryArr) {
+        return (queryArr) => {
+          return (queryArr.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+        };
+      },
+      handleSelectuser2(item) {
+        this.customerList.id = item.id;
+        this.getCustomerCodeList()
+      },
+      getCustomerCodeList() {
+        enterprisecustomercodelist(this.customerList.id).then(response => {
+            const data=response.data.data;
+            this.customerCodeOption=data;
+        })
+      },
+      querySearchAsyncuser4(queryString, callback) {
+        var results = [];
+        for (let i = 0, len =this.customerCodeOption.length; i < len; i++) {
+          this.customerCodeOption[i].value = this.customerCodeOption[i].code;
+        }
+        this.customerCodeList = this.customerCodeOption;
+        results = queryString ? this.customerCodeList.filter(this.createFilteruser4(queryString)) : this.customerCodeList;
+        callback(results);
+      },
+
+      createFilteruser4(queryString, queryArr) {
+        return (queryArr) => {
+          return (queryArr.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+        };
+      },
+      handleSelectuser4(item) {
       },
       querySearchAsyncuser3(queryString, callback) {
           var results = [];
@@ -419,17 +518,6 @@
         };
       },
       handleSelectuser3(item) {
-      },
-      initCustomerList(){
-        let customerOption=[]
-        getCustomerListByConditionAndPage().then(data=>{
-
-          data.data.data.forEach(item=>{
-            customerOption.push({value:item.id+"",label:item.customerName})
-          })
-          this.customerOption=customerOption
-
-        })
       },
       openTableMenu(row, event) {
         this.$refs.menuContext.openTableMenu(row,event);
@@ -450,9 +538,13 @@
       },
       getList() {
         this.listLoading = true
-        getDeviceListByEnterpriseIdAndPage(this.listQuery.enterpriseId).then(response => {
+        getDeviceListBycustom(this.customerCodeList.code).then(response => {
           const data=response.data.data
           this.list=data;
+          this.deviceFormData.deviceType=''
+          this.enterpriseList.enterpriseName='';
+          this.customerList.customerName=''
+          this.customerCodeList.code=''
           this.listLoading = false
         })
       },
@@ -465,10 +557,6 @@
           this.list.push(this.deviceNoList)
           this.listLoading = false
         })
-      },
-      handleCustomerFilter() {
-        this.currentPage1=1
-        this.getCustomerList()
       },
       handleSuffixFilter(){
         this.currentPage1=1
@@ -557,6 +645,10 @@
       },
       handleCreate() {
         this.resetTemp()
+        this.deviceFormData.deviceType=''
+        this.enterpriseList.enterpriseName='';
+        this.customerList.customerName=''
+        this.customerCodeList.code=''
         this.dialogStatus = 'create'
         this.dialogFormVisible = true
         this.$nextTick(() => {
@@ -598,6 +690,9 @@
           }
         })
       },
+      padding(num, length) {
+        return (Array(length).join("0") + num).slice(-length);
+      },
       editData(){
         this.$refs.DeviceFormData.validate(valid => {
           if (valid) {
@@ -612,11 +707,12 @@
                   subType:'',
                   deviceNo:''
                 };
-                deviceAddList.deviceType=this.deviceFormData.deviceType,
-                  deviceAddList.enterpriseId=this.deviceFormData.enterpriseId,
-                 deviceAddList.deviceSuffix=(parseInt(this.deviceFormData.deviceSuffix)+i).toString(),
-                  deviceAddList.subType=this.deviceFormData.deviceType,
-                  deviceAddList.deviceNo=(parseInt(this.deviceFormData.deviceSuffix)+i).toString()
+                deviceAddList.deviceType=this.deviceFormData.deviceType;
+                  deviceAddList.enterpriseId=this.deviceFormData.enterpriseId;
+                 deviceAddList.deviceSuffix=this.padding(parseInt(this.deviceFormData.deviceSuffix)+i,5);
+                deviceAddList.deviceSuffix=this.customerCodeList.code+deviceAddList.deviceSuffix
+                deviceAddList.subType=this.deviceFormData.deviceType;
+                  deviceAddList.deviceNo=deviceAddList.deviceSuffix;
               deviceList.splice(i,0,deviceAddList)
 
               }
