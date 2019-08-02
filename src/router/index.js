@@ -114,14 +114,14 @@ export const constantRouterMap = [
       {
         path: '/wx/devicecontrol',
         component: () => import('../views/deviceControl/index'),
-        name: '微信设备管理',
-        meta: { title: '微信设备管理', noCache: true}
+        name: '微信设备控制管理',
+        meta: { title: '微信设备控制管理', noCache: true}
       },
       {
         path: '/wx/devicepermission',
         component: () => import('../views/devicePermission/index'),
-        name: '微信设备控制管理',
-        meta: { title: '微信设备控制管理', noCache: true}
+        name: '微信设备管理',
+        meta: { title: '微信设备管理', noCache: true}
       },
       {
         path: '/wx/devicesms',
