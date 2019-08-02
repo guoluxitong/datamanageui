@@ -2,9 +2,6 @@
   <div class="app-container">
     <el-row class="app-query">
       <el-col :span="3">
-      <el-input clearable v-model="listQuery.deviceNo" placeholder="设备编号"  style="width: 130px;"></el-input>
-      </el-col>
-      <el-col :span="3">
       <el-input clearable v-model="listQuery.employeeMobile" placeholder="用户名称"  style="width: 130px;"></el-input>
       </el-col>
       <el-col :span="2">
@@ -72,7 +69,6 @@
           total:50,
           pageNum:1,
           pageSize:5,
-          deviceNo:null,
           employeeMobile:null,
           createDatetime:null
         },

@@ -12,7 +12,7 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/api':{
-        target: "http://kuaixin.picp.net:14335",
+        target: "192.168.0.113:8080",
         changeOrigin:true,
         pathRewrite:{
           '^/api':''

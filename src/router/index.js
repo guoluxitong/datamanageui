@@ -120,8 +120,8 @@ export const constantRouterMap = [
       {
         path: '/wx/devicepermission',
         component: () => import('../views/devicePermission/index'),
-        name: '微信设备权限管理',
-        meta: { title: '微信设备权限管理', noCache: true}
+        name: '微信设备控制管理',
+        meta: { title: '微信设备控制管理', noCache: true}
       },
       {
         path: '/wx/devicesms',
